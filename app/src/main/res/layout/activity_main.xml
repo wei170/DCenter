@@ -1,18 +1,95 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity">
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical">
 
     <TextView
+        android:id="@+id/binding_state_label"
+        android:layout_width="wrap_content"
+        android:layout_height="60dp"
+        android:layout_below="@+id/textView"
+        android:layout_centerHorizontal="true"
+        android:layout_gravity="center_horizontal"
+        android:gravity="center"
+        android:text="Binding State:"
+        android:textColor="@color/black"
+        android:textSize="17sp"
+        android:textStyle="bold"
+        tools:layout_editor_absoluteX="138dp"
+        tools:layout_editor_absoluteY="90dp" />
+
+    <TextView
+        android:id="@+id/tv_binding_state_info"
+        android:layout_width="220dp"
+        android:layout_height="60dp"
+        android:layout_below="@+id/binding_state_label"
+        android:layout_centerHorizontal="true"
+        android:layout_gravity="center_horizontal"
+        android:gravity="center"
+        android:text="Unknown"
+        android:textColor="@color/black"
+        android:textSize="17sp"
+        tools:layout_editor_absoluteX="82dp"
+        tools:layout_editor_absoluteY="270dp" />
+
+    <Button
+        android:id="@+id/btn_login"
+        style="@style/common_button"
+        android:layout_alignParentBottom="true"
+        android:layout_alignStart="@+id/tv_binding_state_info"
+        android:layout_gravity="center_horizontal"
+        android:text="Login"
+        tools:layout_editor_absoluteX="82dp"
+        tools:layout_editor_absoluteY="419dp" />
+
+    <Button
+        android:id="@+id/btn_logout"
+        style="@style/common_button"
+        android:layout_alignEnd="@+id/tv_binding_state_info"
+        android:layout_alignParentBottom="true"
+        android:layout_gravity="center_horizontal"
+        android:text="Logout"
+        tools:layout_editor_absoluteX="212dp"
+        tools:layout_editor_absoluteY="419dp" />
+
+    <TextView
+        android:id="@+id/textView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Hello World!"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="40dp"
+        android:text="Application Activation Demo"
+        android:textSize="17sp"
+        tools:layout_editor_absoluteX="86dp"
+        tools:layout_editor_absoluteY="29dp" />
 
-</android.support.constraint.ConstraintLayout>
+    <TextView
+        android:id="@+id/activation_state_label"
+        android:layout_width="wrap_content"
+        android:layout_height="60dp"
+        android:layout_below="@+id/tv_binding_state_info"
+        android:layout_centerHorizontal="true"
+        android:text="App Activation State:"
+        android:textColor="@color/black"
+        android:textSize="17sp"
+        android:textStyle="bold"
+        tools:layout_editor_absoluteX="111dp"
+        tools:layout_editor_absoluteY="210dp" />
+
+    <TextView
+        android:id="@+id/tv_activation_state_info"
+        android:layout_width="220dp"
+        android:layout_height="60dp"
+        android:layout_alignEnd="@+id/tv_binding_state_info"
+        android:layout_below="@+id/activation_state_label"
+        android:text="Unknown"
+        android:textAlignment="center"
+        android:textColor="@color/black"
+        android:textSize="17sp"
+        tools:layout_editor_absoluteX="82dp"
+        tools:layout_editor_absoluteY="150dp" />
+
+</RelativeLayout>
