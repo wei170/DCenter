@@ -40,6 +40,7 @@
         android:layout_alignParentBottom="true"
         android:layout_alignStart="@+id/tv_binding_state_info"
         android:layout_gravity="center_horizontal"
+        android:layout_marginBottom="150dp"
         android:text="Login"
         tools:layout_editor_absoluteX="82dp"
         tools:layout_editor_absoluteY="419dp" />
@@ -50,6 +51,7 @@
         android:layout_alignEnd="@+id/tv_binding_state_info"
         android:layout_alignParentBottom="true"
         android:layout_gravity="center_horizontal"
+        android:layout_marginBottom="150dp"
         android:text="Logout"
         tools:layout_editor_absoluteX="212dp"
         tools:layout_editor_absoluteY="419dp" />
