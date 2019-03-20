@@ -1,7 +1,6 @@
 package edu.purdue.wei170.dcenter;
 
 import android.Manifest;
-import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -15,6 +14,7 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -49,7 +49,7 @@ import dji.common.error.DJIError;
 import dji.sdk.sdkmanager.DJISDKManager;
 import dji.sdk.useraccount.UserAccountManager;
 
-public class ManualControllerActivity extends Activity implements View.OnClickListener {
+public class ManualControllerActivity extends AppCompatActivity implements View.OnClickListener {
 
     private static final String TAG = ManualControllerActivity.class.getName();
 

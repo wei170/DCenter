@@ -1,7 +1,6 @@
 package edu.purdue.wei170.dcenter;
 
 import android.Manifest;
-import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -13,6 +12,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -31,7 +31,7 @@ import dji.sdk.base.BaseProduct;
 import dji.sdk.products.Aircraft;
 import dji.sdk.sdkmanager.DJISDKManager;
 
-public class ConnectionActivity extends Activity implements View.OnClickListener {
+public class ConnectionActivity extends AppCompatActivity implements View.OnClickListener {
 
     private static final String TAG = ConnectionActivity.class.getName();
 
@@ -255,8 +255,7 @@ public class ConnectionActivity extends Activity implements View.OnClickListener
         switch (v.getId()) {
 
             case R.id.btn_open: {
-//                Intent intent = new Intent(this, MapActivity.class);
-                Intent intent = new Intent(this, ManualControllerActivity.class);
+                Intent intent = new Intent(this, ControllerActivity.class);
                 startActivity(intent);
                 break;
             }

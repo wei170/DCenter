@@ -10,11 +10,12 @@ import android.content.IntentFilter;
 import android.os.Build;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.RadioGroup;
 import android.widget.TextView;
@@ -55,14 +56,15 @@ import dji.sdk.products.Aircraft;
 import dji.sdk.sdkmanager.DJISDKManager;
 import dji.sdk.useraccount.UserAccountManager;
 
-public class MapActivity extends FragmentActivity implements View.OnClickListener, GoogleMap.OnMapClickListener, OnMapReadyCallback {
+public class ControllerActivity extends AppCompatActivity implements View.OnClickListener, GoogleMap.OnMapClickListener, OnMapReadyCallback {
 
-    protected static final String TAG = "GSDemoActivity";
+    protected static final String TAG = "ControllerActivity";
 
     private GoogleMap gMap;
 
     private Button locate, add, clear;
     private Button config, upload, start, stop;
+    private ImageButton manualControllerBtn;
 
     private boolean isAdd = false;
 
@@ -108,10 +110,10 @@ public class MapActivity extends FragmentActivity implements View.OnClickListene
     }
 
     private void setResultToToast(final String string){
-        MapActivity.this.runOnUiThread(new Runnable() {
+        ControllerActivity.this.runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                Toast.makeText(MapActivity.this, string, Toast.LENGTH_SHORT).show();
+                Toast.makeText(ControllerActivity.this, string, Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -125,6 +127,7 @@ public class MapActivity extends FragmentActivity implements View.OnClickListene
         upload = (Button) findViewById(R.id.upload);
         start = (Button) findViewById(R.id.start);
         stop = (Button) findViewById(R.id.stop);
+        manualControllerBtn = (ImageButton) findViewById(R.id.manual_controller_btn) ;
 
         locate.setOnClickListener(this);
         add.setOnClickListener(this);
@@ -133,7 +136,7 @@ public class MapActivity extends FragmentActivity implements View.OnClickListene
         upload.setOnClickListener(this);
         start.setOnClickListener(this);
         stop.setOnClickListener(this);
-
+        manualControllerBtn.setOnClickListener(this);
     }
 
     @Override
@@ -156,7 +159,7 @@ public class MapActivity extends FragmentActivity implements View.OnClickListene
                     , 1);
         }
 
-        setContentView(R.layout.activity_map);
+        setContentView(R.layout.activity_controller);
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(DJIApplication.FLAG_CONNECTION_CHANGE);
@@ -325,7 +328,7 @@ public class MapActivity extends FragmentActivity implements View.OnClickListene
         });
     }
 
-    private void markWaypoint(LatLng point){
+    private void markWaypoint(LatLng point) {
         //Create MarkerOptions object
         MarkerOptions markerOptions = new MarkerOptions();
         markerOptions.position(point);
@@ -375,12 +378,15 @@ public class MapActivity extends FragmentActivity implements View.OnClickListene
                 stopWaypointMission();
                 break;
             }
+            case R.id.manual_controller_btn:{
+                switchManualActivity();
+            }
             default:
                 break;
         }
     }
 
-    private void cameraUpdate(){
+    private void cameraUpdate() {
         LatLng pos = new LatLng(droneLocationLat, droneLocationLng);
         float zoomlevel = (float) 18.0;
         CameraUpdate cu = CameraUpdateFactory.newLatLngZoom(pos, zoomlevel);
@@ -388,7 +394,7 @@ public class MapActivity extends FragmentActivity implements View.OnClickListene
 
     }
 
-    private void enableDisableAdd(){
+    private void enableDisableAdd() {
         if (isAdd == false) {
             isAdd = true;
             add.setText("Exit");
@@ -398,7 +404,7 @@ public class MapActivity extends FragmentActivity implements View.OnClickListene
         }
     }
 
-    private void showSettingDialog(){
+    private void showSettingDialog() {
         LinearLayout wayPointSettings = (LinearLayout)getLayoutInflater().inflate(R.layout.dialog_waypointsetting, null);
 
         final TextView wpAltitude_TV = (TextView) wayPointSettings.findViewById(R.id.altitude);
@@ -482,7 +488,7 @@ public class MapActivity extends FragmentActivity implements View.OnClickListene
                 .show();
     }
 
-    String nulltoIntegerDefalt(String value){
+    String nulltoIntegerDefalt(String value) {
         if(!isIntValue(value)) value="0";
         return value;
     }
@@ -496,7 +502,7 @@ public class MapActivity extends FragmentActivity implements View.OnClickListene
         return true;
     }
 
-    private void configWayPointMission(){
+    private void configWayPointMission() {
 
         if (waypointMissionBuilder == null){
 
@@ -533,7 +539,7 @@ public class MapActivity extends FragmentActivity implements View.OnClickListene
         }
     }
 
-    private void uploadWayPointMission(){
+    private void uploadWayPointMission() {
 
         getWaypointMissionOperator().uploadMission(new CommonCallbacks.CompletionCallback() {
             @Override
@@ -549,7 +555,7 @@ public class MapActivity extends FragmentActivity implements View.OnClickListene
 
     }
 
-    private void startWaypointMission(){
+    private void startWaypointMission() {
 
         getWaypointMissionOperator().startMission(new CommonCallbacks.CompletionCallback() {
             @Override
@@ -559,7 +565,7 @@ public class MapActivity extends FragmentActivity implements View.OnClickListene
         });
     }
 
-    private void stopWaypointMission(){
+    private void stopWaypointMission() {
 
         getWaypointMissionOperator().stopMission(new CommonCallbacks.CompletionCallback() {
             @Override
@@ -568,6 +574,11 @@ public class MapActivity extends FragmentActivity implements View.OnClickListene
             }
         });
 
+    }
+
+    private void switchManualActivity() {
+        Intent intent = new Intent(this, ManualControllerActivity.class);
+        startActivity(intent);
     }
 
     @Override

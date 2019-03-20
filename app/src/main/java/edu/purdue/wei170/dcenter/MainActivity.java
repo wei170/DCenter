@@ -303,10 +303,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     public void run() {
                         bindingStateTV.setText("" + bindingState);
                         System.out.println(bindingState);
-                        if (bindingState.toString() == "BOUND") {
-                            Intent mapactivity = new Intent(MainActivity.this, MapActivity.class);
-                            startActivity(mapactivity);
-                        }
                     }
                 });
             }
