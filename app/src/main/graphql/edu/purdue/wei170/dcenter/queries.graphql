@@ -1,0 +1,17 @@
+query Drones {
+  Drones {
+    id
+    name
+    onLine
+    serialNumber
+    owners {
+      user_id
+      user_info {
+        dji_accountName
+      }
+    }
+    status {
+      battery
+    }
+  }
+}

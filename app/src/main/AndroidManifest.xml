@@ -92,6 +92,10 @@
             android:name=".ManualControllerActivity"
             android:screenOrientation="portrait" />
 
+        <activity
+            android:name=".DroneListActivity"
+            android:screenOrientation="portrait" />
+
     </application>
 
     <uses-feature

@@ -17,7 +17,7 @@ public class MainMenuActivity extends AppCompatActivity {
 
         rcBtn.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                Intent intent = new Intent(MainMenuActivity.this, ControllerActivity.class);
+                Intent intent = new Intent(MainMenuActivity.this, DroneListActivity.class);
                 startActivity(intent);
             }
         });

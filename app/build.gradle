@@ -1,8 +1,9 @@
 apply plugin: 'com.android.application'
+apply plugin: 'com.apollographql.android'
 
 android {
     compileSdkVersion 27
-    buildToolsVersion "27.0.3"
+    buildToolsVersion "28.0.3"
     defaultConfig {
         applicationId "edu.purdue.wei170.dcenter"
         minSdkVersion 19
@@ -47,4 +48,11 @@ dependencies {
 
     implementation ('com.dji:dji-sdk:4.8.1')
     compileOnly ('com.dji:dji-sdk-provided:4.8.1')
+
+    implementation ('com.apollographql.apollo:apollo-runtime:1.0.0-alpha5')
+}
+
+apollo {
+    schemaFilePath = "/src/main/graphql/edu/purdue/wei170/dcenter/schema.json"
+    outputPackageName = "edu.purdue.wei170.dcenter.graphql"
 }
