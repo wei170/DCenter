@@ -15,3 +15,21 @@ query Drones {
     }
   }
 }
+
+subscription Drone($id: Int!) {
+	Drones_by_pk(id: $id) {
+    id
+    name
+    onLine
+    serialNumber
+    status {
+      battery
+    }
+    status_id
+    flight_msgs {
+      type
+      value
+      id
+    }
+  }
+}

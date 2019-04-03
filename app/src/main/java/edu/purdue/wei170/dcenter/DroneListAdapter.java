@@ -3,7 +3,6 @@ package edu.purdue.wei170.dcenter;
 import android.content.Context;
 import android.content.Intent;
 import android.support.annotation.NonNull;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,6 +23,7 @@ public class DroneListAdapter extends ArrayAdapter<DronesQuery.Drone> {
 
     public View getView(int position, View droneListView, ViewGroup parent) {
         DronesQuery.Drone drone = getItem(position);
+        final Integer droneId = drone.id();
         final String droneName = drone.name();
         final String droneSerialNumber = drone.serialNumber();
 
@@ -44,7 +44,8 @@ public class DroneListAdapter extends ArrayAdapter<DronesQuery.Drone> {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(context, ControllerActivity.class);
-                intent.putExtra("serialNumber", droneSerialNumber);
+
+                intent.putExtra("droneId", droneId);
                 context.startActivity(intent);
             }
         });

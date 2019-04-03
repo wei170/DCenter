@@ -4,6 +4,7 @@ import android.app.Application;
 import android.content.Context;
 
 import com.apollographql.apollo.ApolloClient;
+import com.apollographql.apollo.subscription.WebSocketSubscriptionTransport;
 import com.secneo.sdk.Helper;
 
 import okhttp3.OkHttpClient;
@@ -28,6 +29,7 @@ public class MApplication extends Application {
         apolloClient = ApolloClient.builder()
                 .serverUrl(BASE_URL)
                 .okHttpClient(okHttpClient)
+                .subscriptionTransportFactory(new WebSocketSubscriptionTransport.Factory(BASE_URL, okHttpClient))
                 .build();
     }
 

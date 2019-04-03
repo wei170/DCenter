@@ -21,6 +21,10 @@ import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.apollographql.apollo.ApolloCall;
+import com.apollographql.apollo.ApolloSubscriptionCall;
+import com.apollographql.apollo.api.Response;
+import com.apollographql.apollo.rx2.Rx2Apollo;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -56,8 +60,17 @@ import dji.sdk.products.Aircraft;
 import dji.sdk.sdkmanager.DJISDKManager;
 import dji.sdk.useraccount.UserAccountManager;
 
+import edu.purdue.wei170.dcenter.graphql.DroneSubscription;
+
+import io.reactivex.Scheduler;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
+import io.reactivex.subscribers.DisposableSubscriber;
+
 public class ControllerActivity extends AppCompatActivity implements View.OnClickListener, GoogleMap.OnMapClickListener, OnMapReadyCallback {
 
+    protected MApplication application;
     protected static final String TAG = "ControllerActivity";
 
     private GoogleMap gMap;
@@ -65,8 +78,11 @@ public class ControllerActivity extends AppCompatActivity implements View.OnClic
     private Button locate, add, clear;
     private Button config, upload, start, stop;
     private ImageButton manualControllerBtn;
+    private TextView droneTV;
 
     private boolean isAdd = false;
+
+    private final CompositeDisposable disposables = new CompositeDisposable();
 
     private double droneLocationLat = 40.423122, droneLocationLng = -86.907188;
     private final Map<Integer, Marker> mMarkers = new ConcurrentHashMap<Integer, Marker>();
@@ -83,32 +99,6 @@ public class ControllerActivity extends AppCompatActivity implements View.OnClic
     private WaypointMissionFinishedAction mFinishedAction = WaypointMissionFinishedAction.NO_ACTION;
     private WaypointMissionHeadingMode mHeadingMode = WaypointMissionHeadingMode.AUTO;
 
-    @Override
-    protected void onResume(){
-        super.onResume();
-        initFlightController();
-    }
-
-    @Override
-    protected void onPause(){
-        super.onPause();
-    }
-
-    @Override
-    protected void onDestroy(){
-        unregisterReceiver(mReceiver);
-        removeListener();
-        super.onDestroy();
-    }
-
-    /**
-     * @Description : RETURN Button RESPONSE FUNCTION
-     */
-    public void onReturn(View view){
-        Log.d(TAG, "onReturn");
-        this.finish();
-    }
-
     private void setResultToToast(final String string){
         ControllerActivity.this.runOnUiThread(new Runnable() {
             @Override
@@ -119,6 +109,7 @@ public class ControllerActivity extends AppCompatActivity implements View.OnClic
     }
 
     private void initUI() {
+        droneTV = (TextView) findViewById(R.id.drone_name_text_view);
 
         locate = (Button) findViewById(R.id.locate);
         add = (Button) findViewById(R.id.add);
@@ -159,7 +150,10 @@ public class ControllerActivity extends AppCompatActivity implements View.OnClic
                     , 1);
         }
 
+        application = (MApplication) getApplication();
         setContentView(R.layout.activity_controller);
+
+        subDroneData();
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(DJIApplication.FLAG_CONNECTION_CHANGE);
@@ -173,6 +167,67 @@ public class ControllerActivity extends AppCompatActivity implements View.OnClic
 
         addListener();
 
+    }
+
+    @Override
+    protected void onResume(){
+        super.onResume();
+        initFlightController();
+    }
+
+    @Override
+    protected void onPause(){
+        super.onPause();
+    }
+
+    @Override
+    protected void onDestroy(){
+        super.onDestroy();
+        unregisterReceiver(mReceiver);
+        removeListener();
+        disposables.dispose();
+    }
+
+    /**
+     * @Description : RETURN Button RESPONSE FUNCTION
+     */
+    public void onReturn(View view){
+        Log.d(TAG, "onReturn");
+        this.finish();
+    }
+
+    private void subDroneData() {
+        Integer droneId = getIntent().getIntExtra("droneId", 0);
+        DroneSubscription droneSub = DroneSubscription.builder().id(droneId).build();
+
+        ApolloSubscriptionCall<DroneSubscription.Data> droneSubCall =  application.apolloClient().subscribe(droneSub);
+        disposables.add(Rx2Apollo.from(droneSubCall)
+                .subscribeWith(new DisposableSubscriber<Response<DroneSubscription.Data>>() {
+                    @Override
+                    public void onNext(final Response<DroneSubscription.Data> dataResponse) {
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                updateUI(dataResponse.data().Drones_by_pk());
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void onError(Throwable t) {
+
+                    }
+
+                    @Override
+                    public void onComplete() {
+
+                    }
+                })
+        );
+    }
+
+    private void updateUI(DroneSubscription.Drones_by_pk dataResponse) {
+        droneTV.setText(dataResponse.name());
     }
 
     protected BroadcastReceiver mReceiver = new BroadcastReceiver() {
@@ -290,13 +345,12 @@ public class ControllerActivity extends AppCompatActivity implements View.OnClic
             if (waypointMissionBuilder != null) {
                 waypointList.add(mWaypoint);
                 waypointMissionBuilder.waypointList(waypointList).waypointCount(waypointList.size());
-            }else
-            {
+            } else {
                 waypointMissionBuilder = new WaypointMission.Builder();
                 waypointList.add(mWaypoint);
                 waypointMissionBuilder.waypointList(waypointList).waypointCount(waypointList.size());
             }
-        }else{
+        } else{
             setResultToToast("Cannot Add Waypoint");
         }
     }

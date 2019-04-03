@@ -49,7 +49,8 @@ dependencies {
     implementation ('com.dji:dji-sdk:4.8.1')
     compileOnly ('com.dji:dji-sdk-provided:4.8.1')
 
-    implementation ('com.apollographql.apollo:apollo-runtime:1.0.0-alpha5')
+    implementation 'com.apollographql.apollo:apollo-runtime:1.0.0-alpha5'
+    implementation "com.apollographql.apollo:apollo-rx2-support:1.0.0-alpha5"
 }
 
 apollo {
