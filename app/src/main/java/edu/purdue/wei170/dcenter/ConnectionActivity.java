@@ -255,7 +255,7 @@ public class ConnectionActivity extends AppCompatActivity implements View.OnClic
         switch (v.getId()) {
 
             case R.id.btn_open: {
-                Intent intent = new Intent(this, ControllerActivity.class);
+                Intent intent = new Intent(this, DroneReceptorActivity.class);
                 startActivity(intent);
                 break;
             }

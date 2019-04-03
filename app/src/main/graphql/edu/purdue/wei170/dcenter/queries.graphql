@@ -1,5 +1,5 @@
-query Drones {
-  Drones {
+query Drones($where: Drones_bool_exp) {
+  Drones(where: $where) {
     id
     name
     onLine
@@ -25,11 +25,26 @@ subscription Drone($id: Int!) {
     status {
       battery
     }
-    status_id
     flight_msgs {
       type
       value
       id
     }
   }
+}
+
+mutation insertDrones($objects: [Drones_insert_input!]!) {
+  insert_Drones(objects: $objects) {
+    returning {
+      id
+    }
+  }
+}
+
+mutation insertDroneStatus($objects: [DroneStatus_insert_input!]!) {
+	insert_DroneStatus(objects: $objects) {
+		returning {
+			id
+		}
+	}
 }

@@ -16,6 +16,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import edu.purdue.wei170.dcenter.graphql.DronesQuery;
+import edu.purdue.wei170.dcenter.graphql.type.Boolean_comparison_exp;
+import edu.purdue.wei170.dcenter.graphql.type.Drones_bool_exp;
 
 public class DroneListActivity extends AppCompatActivity {
     MApplication application;
@@ -41,7 +43,7 @@ public class DroneListActivity extends AppCompatActivity {
 
             @Override
             public void onResponse(@NotNull Response<DronesQuery.Data> response) {
-                Log.i("TAG", response.data().toString());
+                Log.i("TAG", response.data().Drones().toString());
                 droneArray = response.data().Drones();
                 runOnUiThread(new Runnable() {
                     @Override
@@ -54,7 +56,7 @@ public class DroneListActivity extends AppCompatActivity {
 
             @Override
             public void onFailure(@NotNull ApolloException e) {
-                Log.e("ERROR", e.getMessage());
+                Log.e("ERROR", e.toString());
             }
         });
     }

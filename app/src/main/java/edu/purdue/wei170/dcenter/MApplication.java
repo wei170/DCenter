@@ -10,8 +10,10 @@ import com.secneo.sdk.Helper;
 import okhttp3.OkHttpClient;
 
 public class MApplication extends Application {
+
     private static final String BASE_URL = "https://dcenter-guocheng.herokuapp.com/v1alpha1/graphql";
     private ApolloClient apolloClient;
+    private DJIApplication djiApplication;
 
     public MApplication() {}
 
@@ -19,11 +21,18 @@ public class MApplication extends Application {
     protected void attachBaseContext(Context paramContext) {
         super.attachBaseContext(paramContext);
         Helper.install(MApplication.this);
+
+        if (djiApplication == null) {
+            djiApplication = new DJIApplication();
+            djiApplication.setContext(this);
+        }
     }
 
     @Override
     public void onCreate() {
         super.onCreate();
+
+        // Set up the Apollo manager
         OkHttpClient okHttpClient = new OkHttpClient.Builder()
                 .build();
         apolloClient = ApolloClient.builder()
@@ -31,6 +40,9 @@ public class MApplication extends Application {
                 .okHttpClient(okHttpClient)
                 .subscriptionTransportFactory(new WebSocketSubscriptionTransport.Factory(BASE_URL, okHttpClient))
                 .build();
+
+        // Create the djiApplication to register
+        djiApplication.onCreate();
     }
 
     public ApolloClient apolloClient() {

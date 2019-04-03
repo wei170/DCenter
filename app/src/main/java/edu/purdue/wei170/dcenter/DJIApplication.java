@@ -43,7 +43,7 @@ public class DJIApplication extends Application {
     }
 
     public static synchronized BaseProduct getProductInstance() {
-        if (null == mProduct) {
+        if (mProduct == null) {
             mProduct = DJISDKManager.getInstance().getProduct();
         }
         return mProduct;

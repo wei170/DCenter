@@ -34,9 +34,14 @@
             "description": null,
             "args": [],
             "type": {
-              "kind": "SCALAR",
-              "name": "String",
-              "ofType": null,
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null,
+                "__typename": "__Type"
+              },
               "__typename": "__Type"
             },
             "isDeprecated": false,
@@ -44,7 +49,7 @@
             "__typename": "__Field"
           },
           {
-            "name": "drone_id",
+            "name": "drone_serialNumber",
             "description": null,
             "args": [],
             "type": {
@@ -52,7 +57,7 @@
               "name": null,
               "ofType": {
                 "kind": "SCALAR",
-                "name": "Int",
+                "name": "String",
                 "ofType": null,
                 "__typename": "__Type"
               },
@@ -545,20 +550,6 @@
         "description": "aggregate avg on columns",
         "fields": [
           {
-            "name": "drone_id",
-            "description": null,
-            "args": [],
-            "type": {
-              "kind": "SCALAR",
-              "name": "Float",
-              "ofType": null,
-              "__typename": "__Type"
-            },
-            "isDeprecated": false,
-            "deprecationReason": null,
-            "__typename": "__Field"
-          },
-          {
             "name": "id",
             "description": null,
             "args": [],
@@ -585,18 +576,6 @@
         "description": "order by avg() on columns of table \"DroneStatus\"",
         "fields": null,
         "inputFields": [
-          {
-            "name": "drone_id",
-            "description": null,
-            "type": {
-              "kind": "ENUM",
-              "name": "order_by",
-              "ofType": null,
-              "__typename": "__Type"
-            },
-            "defaultValue": null,
-            "__typename": "__InputValue"
-          },
           {
             "name": "id",
             "description": null,
@@ -680,11 +659,11 @@
             "__typename": "__InputValue"
           },
           {
-            "name": "drone_id",
+            "name": "drone_serialNumber",
             "description": null,
             "type": {
               "kind": "INPUT_OBJECT",
-              "name": "integer_comparison_exp",
+              "name": "text_comparison_exp",
               "ofType": null,
               "__typename": "__Type"
             },
@@ -718,7 +697,7 @@
         "interfaces": null,
         "enumValues": [
           {
-            "name": "DroneStatus_drone_id_key",
+            "name": "DroneStatus_drone_serialNumber_key",
             "description": "unique or primary key constraint",
             "isDeprecated": false,
             "deprecationReason": null,
@@ -741,18 +720,6 @@
         "description": "input type for incrementing integer columne in table \"DroneStatus\"",
         "fields": null,
         "inputFields": [
-          {
-            "name": "drone_id",
-            "description": null,
-            "type": {
-              "kind": "SCALAR",
-              "name": "Int",
-              "ofType": null,
-              "__typename": "__Type"
-            },
-            "defaultValue": null,
-            "__typename": "__InputValue"
-          },
           {
             "name": "id",
             "description": null,
@@ -790,11 +757,11 @@
             "__typename": "__InputValue"
           },
           {
-            "name": "drone_id",
+            "name": "drone_serialNumber",
             "description": null,
             "type": {
               "kind": "SCALAR",
-              "name": "Int",
+              "name": "String",
               "ofType": null,
               "__typename": "__Type"
             },
@@ -839,12 +806,12 @@
             "__typename": "__Field"
           },
           {
-            "name": "drone_id",
+            "name": "drone_serialNumber",
             "description": null,
             "args": [],
             "type": {
               "kind": "SCALAR",
-              "name": "Int",
+              "name": "String",
               "ofType": null,
               "__typename": "__Type"
             },
@@ -892,7 +859,7 @@
             "__typename": "__InputValue"
           },
           {
-            "name": "drone_id",
+            "name": "drone_serialNumber",
             "description": null,
             "type": {
               "kind": "ENUM",
@@ -941,12 +908,12 @@
             "__typename": "__Field"
           },
           {
-            "name": "drone_id",
+            "name": "drone_serialNumber",
             "description": null,
             "args": [],
             "type": {
               "kind": "SCALAR",
-              "name": "Int",
+              "name": "String",
               "ofType": null,
               "__typename": "__Type"
             },
@@ -994,7 +961,7 @@
             "__typename": "__InputValue"
           },
           {
-            "name": "drone_id",
+            "name": "drone_serialNumber",
             "description": null,
             "type": {
               "kind": "ENUM",
@@ -1199,7 +1166,7 @@
             "__typename": "__InputValue"
           },
           {
-            "name": "drone_id",
+            "name": "drone_serialNumber",
             "description": null,
             "type": {
               "kind": "ENUM",
@@ -1244,7 +1211,7 @@
             "__typename": "__EnumValue"
           },
           {
-            "name": "drone_id",
+            "name": "drone_serialNumber",
             "description": "column name",
             "isDeprecated": false,
             "deprecationReason": null,
@@ -1280,11 +1247,11 @@
             "__typename": "__InputValue"
           },
           {
-            "name": "drone_id",
+            "name": "drone_serialNumber",
             "description": null,
             "type": {
               "kind": "SCALAR",
-              "name": "Int",
+              "name": "String",
               "ofType": null,
               "__typename": "__Type"
             },
@@ -1315,20 +1282,6 @@
         "description": "aggregate stddev on columns",
         "fields": [
           {
-            "name": "drone_id",
-            "description": null,
-            "args": [],
-            "type": {
-              "kind": "SCALAR",
-              "name": "Float",
-              "ofType": null,
-              "__typename": "__Type"
-            },
-            "isDeprecated": false,
-            "deprecationReason": null,
-            "__typename": "__Field"
-          },
-          {
             "name": "id",
             "description": null,
             "args": [],
@@ -1356,18 +1309,6 @@
         "fields": null,
         "inputFields": [
           {
-            "name": "drone_id",
-            "description": null,
-            "type": {
-              "kind": "ENUM",
-              "name": "order_by",
-              "ofType": null,
-              "__typename": "__Type"
-            },
-            "defaultValue": null,
-            "__typename": "__InputValue"
-          },
-          {
             "name": "id",
             "description": null,
             "type": {
@@ -1390,20 +1331,6 @@
         "name": "DroneStatus_stddev_pop_fields",
         "description": "aggregate stddev_pop on columns",
         "fields": [
-          {
-            "name": "drone_id",
-            "description": null,
-            "args": [],
-            "type": {
-              "kind": "SCALAR",
-              "name": "Float",
-              "ofType": null,
-              "__typename": "__Type"
-            },
-            "isDeprecated": false,
-            "deprecationReason": null,
-            "__typename": "__Field"
-          },
           {
             "name": "id",
             "description": null,
@@ -1432,18 +1359,6 @@
         "fields": null,
         "inputFields": [
           {
-            "name": "drone_id",
-            "description": null,
-            "type": {
-              "kind": "ENUM",
-              "name": "order_by",
-              "ofType": null,
-              "__typename": "__Type"
-            },
-            "defaultValue": null,
-            "__typename": "__InputValue"
-          },
-          {
             "name": "id",
             "description": null,
             "type": {
@@ -1466,20 +1381,6 @@
         "name": "DroneStatus_stddev_samp_fields",
         "description": "aggregate stddev_samp on columns",
         "fields": [
-          {
-            "name": "drone_id",
-            "description": null,
-            "args": [],
-            "type": {
-              "kind": "SCALAR",
-              "name": "Float",
-              "ofType": null,
-              "__typename": "__Type"
-            },
-            "isDeprecated": false,
-            "deprecationReason": null,
-            "__typename": "__Field"
-          },
           {
             "name": "id",
             "description": null,
@@ -1508,18 +1409,6 @@
         "fields": null,
         "inputFields": [
           {
-            "name": "drone_id",
-            "description": null,
-            "type": {
-              "kind": "ENUM",
-              "name": "order_by",
-              "ofType": null,
-              "__typename": "__Type"
-            },
-            "defaultValue": null,
-            "__typename": "__InputValue"
-          },
-          {
             "name": "id",
             "description": null,
             "type": {
@@ -1542,20 +1431,6 @@
         "name": "DroneStatus_sum_fields",
         "description": "aggregate sum on columns",
         "fields": [
-          {
-            "name": "drone_id",
-            "description": null,
-            "args": [],
-            "type": {
-              "kind": "SCALAR",
-              "name": "Int",
-              "ofType": null,
-              "__typename": "__Type"
-            },
-            "isDeprecated": false,
-            "deprecationReason": null,
-            "__typename": "__Field"
-          },
           {
             "name": "id",
             "description": null,
@@ -1583,18 +1458,6 @@
         "description": "order by sum() on columns of table \"DroneStatus\"",
         "fields": null,
         "inputFields": [
-          {
-            "name": "drone_id",
-            "description": null,
-            "type": {
-              "kind": "ENUM",
-              "name": "order_by",
-              "ofType": null,
-              "__typename": "__Type"
-            },
-            "defaultValue": null,
-            "__typename": "__InputValue"
-          },
           {
             "name": "id",
             "description": null,
@@ -1629,7 +1492,7 @@
             "__typename": "__EnumValue"
           },
           {
-            "name": "drone_id",
+            "name": "drone_serialNumber",
             "description": "column name",
             "isDeprecated": false,
             "deprecationReason": null,
@@ -1651,20 +1514,6 @@
         "name": "DroneStatus_var_pop_fields",
         "description": "aggregate var_pop on columns",
         "fields": [
-          {
-            "name": "drone_id",
-            "description": null,
-            "args": [],
-            "type": {
-              "kind": "SCALAR",
-              "name": "Float",
-              "ofType": null,
-              "__typename": "__Type"
-            },
-            "isDeprecated": false,
-            "deprecationReason": null,
-            "__typename": "__Field"
-          },
           {
             "name": "id",
             "description": null,
@@ -1693,18 +1542,6 @@
         "fields": null,
         "inputFields": [
           {
-            "name": "drone_id",
-            "description": null,
-            "type": {
-              "kind": "ENUM",
-              "name": "order_by",
-              "ofType": null,
-              "__typename": "__Type"
-            },
-            "defaultValue": null,
-            "__typename": "__InputValue"
-          },
-          {
             "name": "id",
             "description": null,
             "type": {
@@ -1727,20 +1564,6 @@
         "name": "DroneStatus_var_samp_fields",
         "description": "aggregate var_samp on columns",
         "fields": [
-          {
-            "name": "drone_id",
-            "description": null,
-            "args": [],
-            "type": {
-              "kind": "SCALAR",
-              "name": "Float",
-              "ofType": null,
-              "__typename": "__Type"
-            },
-            "isDeprecated": false,
-            "deprecationReason": null,
-            "__typename": "__Field"
-          },
           {
             "name": "id",
             "description": null,
@@ -1769,18 +1592,6 @@
         "fields": null,
         "inputFields": [
           {
-            "name": "drone_id",
-            "description": null,
-            "type": {
-              "kind": "ENUM",
-              "name": "order_by",
-              "ofType": null,
-              "__typename": "__Type"
-            },
-            "defaultValue": null,
-            "__typename": "__InputValue"
-          },
-          {
             "name": "id",
             "description": null,
             "type": {
@@ -1803,20 +1614,6 @@
         "name": "DroneStatus_variance_fields",
         "description": "aggregate variance on columns",
         "fields": [
-          {
-            "name": "drone_id",
-            "description": null,
-            "args": [],
-            "type": {
-              "kind": "SCALAR",
-              "name": "Float",
-              "ofType": null,
-              "__typename": "__Type"
-            },
-            "isDeprecated": false,
-            "deprecationReason": null,
-            "__typename": "__Field"
-          },
           {
             "name": "id",
             "description": null,
@@ -1844,18 +1641,6 @@
         "description": "order by variance() on columns of table \"DroneStatus\"",
         "fields": null,
         "inputFields": [
-          {
-            "name": "drone_id",
-            "description": null,
-            "type": {
-              "kind": "ENUM",
-              "name": "order_by",
-              "ofType": null,
-              "__typename": "__Type"
-            },
-            "defaultValue": null,
-            "__typename": "__InputValue"
-          },
           {
             "name": "id",
             "description": null,
@@ -2383,20 +2168,6 @@
             "isDeprecated": false,
             "deprecationReason": null,
             "__typename": "__Field"
-          },
-          {
-            "name": "status_id",
-            "description": null,
-            "args": [],
-            "type": {
-              "kind": "SCALAR",
-              "name": "Int",
-              "ofType": null,
-              "__typename": "__Type"
-            },
-            "isDeprecated": false,
-            "deprecationReason": null,
-            "__typename": "__Field"
           }
         ],
         "inputFields": null,
@@ -2874,20 +2645,6 @@
             "isDeprecated": false,
             "deprecationReason": null,
             "__typename": "__Field"
-          },
-          {
-            "name": "status_id",
-            "description": null,
-            "args": [],
-            "type": {
-              "kind": "SCALAR",
-              "name": "Float",
-              "ofType": null,
-              "__typename": "__Type"
-            },
-            "isDeprecated": false,
-            "deprecationReason": null,
-            "__typename": "__Field"
           }
         ],
         "inputFields": null,
@@ -2904,18 +2661,6 @@
         "inputFields": [
           {
             "name": "id",
-            "description": null,
-            "type": {
-              "kind": "ENUM",
-              "name": "order_by",
-              "ofType": null,
-              "__typename": "__Type"
-            },
-            "defaultValue": null,
-            "__typename": "__InputValue"
-          },
-          {
-            "name": "status_id",
             "description": null,
             "type": {
               "kind": "ENUM",
@@ -3067,18 +2812,6 @@
             },
             "defaultValue": null,
             "__typename": "__InputValue"
-          },
-          {
-            "name": "status_id",
-            "description": null,
-            "type": {
-              "kind": "INPUT_OBJECT",
-              "name": "integer_comparison_exp",
-              "ofType": null,
-              "__typename": "__Type"
-            },
-            "defaultValue": null,
-            "__typename": "__InputValue"
           }
         ],
         "interfaces": null,
@@ -3100,6 +2833,13 @@
             "isDeprecated": false,
             "deprecationReason": null,
             "__typename": "__EnumValue"
+          },
+          {
+            "name": "Drones_serialNumber_key",
+            "description": "unique or primary key constraint",
+            "isDeprecated": false,
+            "deprecationReason": null,
+            "__typename": "__EnumValue"
           }
         ],
         "possibleTypes": null,
@@ -3113,18 +2853,6 @@
         "inputFields": [
           {
             "name": "id",
-            "description": null,
-            "type": {
-              "kind": "SCALAR",
-              "name": "Int",
-              "ofType": null,
-              "__typename": "__Type"
-            },
-            "defaultValue": null,
-            "__typename": "__InputValue"
-          },
-          {
-            "name": "status_id",
             "description": null,
             "type": {
               "kind": "SCALAR",
@@ -3230,18 +2958,6 @@
             },
             "defaultValue": null,
             "__typename": "__InputValue"
-          },
-          {
-            "name": "status_id",
-            "description": null,
-            "type": {
-              "kind": "SCALAR",
-              "name": "Int",
-              "ofType": null,
-              "__typename": "__Type"
-            },
-            "defaultValue": null,
-            "__typename": "__InputValue"
           }
         ],
         "interfaces": null,
@@ -3295,20 +3011,6 @@
             "isDeprecated": false,
             "deprecationReason": null,
             "__typename": "__Field"
-          },
-          {
-            "name": "status_id",
-            "description": null,
-            "args": [],
-            "type": {
-              "kind": "SCALAR",
-              "name": "Int",
-              "ofType": null,
-              "__typename": "__Type"
-            },
-            "isDeprecated": false,
-            "deprecationReason": null,
-            "__typename": "__Field"
           }
         ],
         "inputFields": null,
@@ -3349,18 +3051,6 @@
           },
           {
             "name": "serialNumber",
-            "description": null,
-            "type": {
-              "kind": "ENUM",
-              "name": "order_by",
-              "ofType": null,
-              "__typename": "__Type"
-            },
-            "defaultValue": null,
-            "__typename": "__InputValue"
-          },
-          {
-            "name": "status_id",
             "description": null,
             "type": {
               "kind": "ENUM",
@@ -3423,20 +3113,6 @@
             "isDeprecated": false,
             "deprecationReason": null,
             "__typename": "__Field"
-          },
-          {
-            "name": "status_id",
-            "description": null,
-            "args": [],
-            "type": {
-              "kind": "SCALAR",
-              "name": "Int",
-              "ofType": null,
-              "__typename": "__Type"
-            },
-            "isDeprecated": false,
-            "deprecationReason": null,
-            "__typename": "__Field"
           }
         ],
         "inputFields": null,
@@ -3477,18 +3153,6 @@
           },
           {
             "name": "serialNumber",
-            "description": null,
-            "type": {
-              "kind": "ENUM",
-              "name": "order_by",
-              "ofType": null,
-              "__typename": "__Type"
-            },
-            "defaultValue": null,
-            "__typename": "__InputValue"
-          },
-          {
-            "name": "status_id",
             "description": null,
             "type": {
               "kind": "ENUM",
@@ -3751,18 +3415,6 @@
             },
             "defaultValue": null,
             "__typename": "__InputValue"
-          },
-          {
-            "name": "status_id",
-            "description": null,
-            "type": {
-              "kind": "ENUM",
-              "name": "order_by",
-              "ofType": null,
-              "__typename": "__Type"
-            },
-            "defaultValue": null,
-            "__typename": "__InputValue"
           }
         ],
         "interfaces": null,
@@ -3801,13 +3453,6 @@
           },
           {
             "name": "serialNumber",
-            "description": "column name",
-            "isDeprecated": false,
-            "deprecationReason": null,
-            "__typename": "__EnumValue"
-          },
-          {
-            "name": "status_id",
             "description": "column name",
             "isDeprecated": false,
             "deprecationReason": null,
@@ -3870,18 +3515,6 @@
             },
             "defaultValue": null,
             "__typename": "__InputValue"
-          },
-          {
-            "name": "status_id",
-            "description": null,
-            "type": {
-              "kind": "SCALAR",
-              "name": "Int",
-              "ofType": null,
-              "__typename": "__Type"
-            },
-            "defaultValue": null,
-            "__typename": "__InputValue"
           }
         ],
         "interfaces": null,
@@ -3896,20 +3529,6 @@
         "fields": [
           {
             "name": "id",
-            "description": null,
-            "args": [],
-            "type": {
-              "kind": "SCALAR",
-              "name": "Float",
-              "ofType": null,
-              "__typename": "__Type"
-            },
-            "isDeprecated": false,
-            "deprecationReason": null,
-            "__typename": "__Field"
-          },
-          {
-            "name": "status_id",
             "description": null,
             "args": [],
             "type": {
@@ -3946,18 +3565,6 @@
             },
             "defaultValue": null,
             "__typename": "__InputValue"
-          },
-          {
-            "name": "status_id",
-            "description": null,
-            "type": {
-              "kind": "ENUM",
-              "name": "order_by",
-              "ofType": null,
-              "__typename": "__Type"
-            },
-            "defaultValue": null,
-            "__typename": "__InputValue"
           }
         ],
         "interfaces": null,
@@ -3972,20 +3579,6 @@
         "fields": [
           {
             "name": "id",
-            "description": null,
-            "args": [],
-            "type": {
-              "kind": "SCALAR",
-              "name": "Float",
-              "ofType": null,
-              "__typename": "__Type"
-            },
-            "isDeprecated": false,
-            "deprecationReason": null,
-            "__typename": "__Field"
-          },
-          {
-            "name": "status_id",
             "description": null,
             "args": [],
             "type": {
@@ -4022,18 +3615,6 @@
             },
             "defaultValue": null,
             "__typename": "__InputValue"
-          },
-          {
-            "name": "status_id",
-            "description": null,
-            "type": {
-              "kind": "ENUM",
-              "name": "order_by",
-              "ofType": null,
-              "__typename": "__Type"
-            },
-            "defaultValue": null,
-            "__typename": "__InputValue"
           }
         ],
         "interfaces": null,
@@ -4048,20 +3629,6 @@
         "fields": [
           {
             "name": "id",
-            "description": null,
-            "args": [],
-            "type": {
-              "kind": "SCALAR",
-              "name": "Float",
-              "ofType": null,
-              "__typename": "__Type"
-            },
-            "isDeprecated": false,
-            "deprecationReason": null,
-            "__typename": "__Field"
-          },
-          {
-            "name": "status_id",
             "description": null,
             "args": [],
             "type": {
@@ -4098,18 +3665,6 @@
             },
             "defaultValue": null,
             "__typename": "__InputValue"
-          },
-          {
-            "name": "status_id",
-            "description": null,
-            "type": {
-              "kind": "ENUM",
-              "name": "order_by",
-              "ofType": null,
-              "__typename": "__Type"
-            },
-            "defaultValue": null,
-            "__typename": "__InputValue"
           }
         ],
         "interfaces": null,
@@ -4124,20 +3679,6 @@
         "fields": [
           {
             "name": "id",
-            "description": null,
-            "args": [],
-            "type": {
-              "kind": "SCALAR",
-              "name": "Int",
-              "ofType": null,
-              "__typename": "__Type"
-            },
-            "isDeprecated": false,
-            "deprecationReason": null,
-            "__typename": "__Field"
-          },
-          {
-            "name": "status_id",
             "description": null,
             "args": [],
             "type": {
@@ -4165,18 +3706,6 @@
         "inputFields": [
           {
             "name": "id",
-            "description": null,
-            "type": {
-              "kind": "ENUM",
-              "name": "order_by",
-              "ofType": null,
-              "__typename": "__Type"
-            },
-            "defaultValue": null,
-            "__typename": "__InputValue"
-          },
-          {
-            "name": "status_id",
             "description": null,
             "type": {
               "kind": "ENUM",
@@ -4228,13 +3757,6 @@
             "isDeprecated": false,
             "deprecationReason": null,
             "__typename": "__EnumValue"
-          },
-          {
-            "name": "status_id",
-            "description": "column name",
-            "isDeprecated": false,
-            "deprecationReason": null,
-            "__typename": "__EnumValue"
           }
         ],
         "possibleTypes": null,
@@ -4247,20 +3769,6 @@
         "fields": [
           {
             "name": "id",
-            "description": null,
-            "args": [],
-            "type": {
-              "kind": "SCALAR",
-              "name": "Float",
-              "ofType": null,
-              "__typename": "__Type"
-            },
-            "isDeprecated": false,
-            "deprecationReason": null,
-            "__typename": "__Field"
-          },
-          {
-            "name": "status_id",
             "description": null,
             "args": [],
             "type": {
@@ -4297,18 +3805,6 @@
             },
             "defaultValue": null,
             "__typename": "__InputValue"
-          },
-          {
-            "name": "status_id",
-            "description": null,
-            "type": {
-              "kind": "ENUM",
-              "name": "order_by",
-              "ofType": null,
-              "__typename": "__Type"
-            },
-            "defaultValue": null,
-            "__typename": "__InputValue"
           }
         ],
         "interfaces": null,
@@ -4323,20 +3819,6 @@
         "fields": [
           {
             "name": "id",
-            "description": null,
-            "args": [],
-            "type": {
-              "kind": "SCALAR",
-              "name": "Float",
-              "ofType": null,
-              "__typename": "__Type"
-            },
-            "isDeprecated": false,
-            "deprecationReason": null,
-            "__typename": "__Field"
-          },
-          {
-            "name": "status_id",
             "description": null,
             "args": [],
             "type": {
@@ -4373,18 +3855,6 @@
             },
             "defaultValue": null,
             "__typename": "__InputValue"
-          },
-          {
-            "name": "status_id",
-            "description": null,
-            "type": {
-              "kind": "ENUM",
-              "name": "order_by",
-              "ofType": null,
-              "__typename": "__Type"
-            },
-            "defaultValue": null,
-            "__typename": "__InputValue"
           }
         ],
         "interfaces": null,
@@ -4399,20 +3869,6 @@
         "fields": [
           {
             "name": "id",
-            "description": null,
-            "args": [],
-            "type": {
-              "kind": "SCALAR",
-              "name": "Float",
-              "ofType": null,
-              "__typename": "__Type"
-            },
-            "isDeprecated": false,
-            "deprecationReason": null,
-            "__typename": "__Field"
-          },
-          {
-            "name": "status_id",
             "description": null,
             "args": [],
             "type": {
@@ -4440,18 +3896,6 @@
         "inputFields": [
           {
             "name": "id",
-            "description": null,
-            "type": {
-              "kind": "ENUM",
-              "name": "order_by",
-              "ofType": null,
-              "__typename": "__Type"
-            },
-            "defaultValue": null,
-            "__typename": "__InputValue"
-          },
-          {
-            "name": "status_id",
             "description": null,
             "type": {
               "kind": "ENUM",

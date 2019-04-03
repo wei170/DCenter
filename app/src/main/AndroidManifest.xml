@@ -85,6 +85,14 @@
             android:screenOrientation="portrait" />
 
         <activity
+            android:name=".DroneReceptorActivity"
+            android:screenOrientation="portrait" />
+
+        <activity
+            android:name=".DroneListActivity"
+            android:screenOrientation="portrait" />
+
+        <activity
             android:name=".ControllerActivity"
             android:screenOrientation="portrait" />
 
@@ -92,9 +100,6 @@
             android:name=".ManualControllerActivity"
             android:screenOrientation="portrait" />
 
-        <activity
-            android:name=".DroneListActivity"
-            android:screenOrientation="portrait" />
 
     </application>
 
