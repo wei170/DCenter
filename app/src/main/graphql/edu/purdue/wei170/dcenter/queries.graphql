@@ -11,6 +11,7 @@ query Drones($where: Drones_bool_exp) {
       }
     }
     status {
+			id
       battery
     }
   }
@@ -23,7 +24,10 @@ subscription Drone($id: Int!) {
     onLine
     serialNumber
     status {
+			id
       battery
+			locLat
+			locLng
     }
     flight_msgs {
       type
@@ -43,6 +47,14 @@ mutation insertDrones($objects: [Drones_insert_input!]!) {
 
 mutation insertDroneStatus($objects: [DroneStatus_insert_input!]!) {
 	insert_DroneStatus(objects: $objects) {
+		returning {
+			id
+		}
+	}
+}
+
+mutation updateDroneStatus($where: DroneStatus_bool_exp!, $_set: DroneStatus_set_input) {
+	update_DroneStatus(where: $where, _set: $_set) {
 		returning {
 			id
 		}

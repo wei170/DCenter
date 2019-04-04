@@ -1,6 +1,7 @@
 package edu.purdue.wei170.dcenter;
 
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.text.method.ScrollingMovementMethod;
@@ -10,7 +11,6 @@ import android.widget.TextView;
 import com.apollographql.apollo.ApolloCall;
 import com.apollographql.apollo.api.Response;
 import com.apollographql.apollo.rx2.Rx2Apollo;
-import com.google.android.gms.maps.model.LatLng;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,14 +21,16 @@ import dji.common.util.CommonCallbacks;
 import dji.sdk.base.BaseProduct;
 import dji.sdk.flightcontroller.FlightController;
 import dji.sdk.products.Aircraft;
-import edu.purdue.wei170.dcenter.graphql.DroneSubscription;
 import edu.purdue.wei170.dcenter.graphql.DronesQuery;
 import edu.purdue.wei170.dcenter.graphql.InsertDroneStatusMutation;
 import edu.purdue.wei170.dcenter.graphql.InsertDronesMutation;
+import edu.purdue.wei170.dcenter.graphql.UpdateDroneStatusMutation;
+import edu.purdue.wei170.dcenter.graphql.type.DroneStatus_bool_exp;
 import edu.purdue.wei170.dcenter.graphql.type.DroneStatus_insert_input;
-import edu.purdue.wei170.dcenter.graphql.type.DroneStatus_obj_rel_insert_input;
+import edu.purdue.wei170.dcenter.graphql.type.DroneStatus_set_input;
 import edu.purdue.wei170.dcenter.graphql.type.Drones_bool_exp;
 import edu.purdue.wei170.dcenter.graphql.type.Drones_insert_input;
+import edu.purdue.wei170.dcenter.graphql.type.Integer_comparison_exp;
 import edu.purdue.wei170.dcenter.graphql.type.Text_comparison_exp;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.observers.DisposableObserver;
@@ -52,6 +54,11 @@ public class DroneReceptorActivity extends AppCompatActivity {
 
         initUi();
 
+    }
+
+    @Override
+    protected void onResume(){
+        super.onResume();
         initFlightController();
     }
 
@@ -66,6 +73,7 @@ public class DroneReceptorActivity extends AppCompatActivity {
         msgLogger.setSingleLine(false);
         msgLogger.setMovementMethod(new ScrollingMovementMethod());
         msgLogger.append("Started!\n");
+        initFlightController();
     }
 
     private void initFlightController() {
@@ -76,11 +84,14 @@ public class DroneReceptorActivity extends AppCompatActivity {
                 mFlightController = ((Aircraft) product).getFlightController();
             }
         }
+
+        // Get the Aircraft serialNumber
         mFlightController.getSerialNumber(new CommonCallbacks.CompletionCallbackWith<String>() {
             @Override
             public void onSuccess(String s) {
                 droneSerialNumber = s;
                 msgLogger.append("Drone Serial Number Received: " + droneSerialNumber + "\n");
+                fetchDroneInfo();
             }
 
             @Override
@@ -94,18 +105,18 @@ public class DroneReceptorActivity extends AppCompatActivity {
             mFlightController.setStateCallback(new FlightControllerState.Callback() {
 
                 @Override
-                public void onUpdate(FlightControllerState djiFlightControllerCurrentState) {
-                    droneLocationLat = djiFlightControllerCurrentState.getAircraftLocation().getLatitude();
-                    droneLocationLng = djiFlightControllerCurrentState.getAircraftLocation().getLongitude();
-                    updateDroneLocation();
+                public void onUpdate(@NonNull FlightControllerState djiFlightControllerCurrentState) {
+                    observeFlightControllerStatus(djiFlightControllerCurrentState);
                 }
             });
         }
     }
 
     // Update the drone location based on states from MCU.
-    private void updateDroneLocation() {
-        // TODO
+    private void fetchDroneInfo() {
+        // Make sure we get the droneSerialNumber
+        if (droneSerialNumber == null) return;
+
         Drones_bool_exp exp = Drones_bool_exp.builder()
                 .serialNumber(Text_comparison_exp.builder()
                         ._eq(droneSerialNumber)
@@ -125,6 +136,7 @@ public class DroneReceptorActivity extends AppCompatActivity {
                                 registerDrone();
                             } else {
                                 // get the DroneStatus
+                                droneStatusId = drones.get(0).status().id();
                             }
                         }
                     }
@@ -160,8 +172,7 @@ public class DroneReceptorActivity extends AppCompatActivity {
                 .subscribeWith(new DisposableObserver<Response<InsertDronesMutation.Data>>() {
                     @Override
                     public void onNext(Response<InsertDronesMutation.Data> dataResponse) {
-                        String tmp = dataResponse.data().insert_Drones().toString();
-                        msgLogger.append(tmp + "\n");
+                        msgLogger.append(String.format("The drone %s is registered\n", droneSerialNumber));
                     }
 
                     @Override
@@ -191,9 +202,10 @@ public class DroneReceptorActivity extends AppCompatActivity {
                 .subscribeWith(new DisposableObserver<Response<InsertDroneStatusMutation.Data>>() {
                     @Override
                     public void onNext(Response<InsertDroneStatusMutation.Data> dataResponse) {
-                        String tmp = dataResponse.data().insert_DroneStatus().toString();
-                        msgLogger.append(tmp + "\n");
-                        // TODO: get the DroneStatus
+                        // Get the DroneStatus
+                        droneStatusId = dataResponse.data().insert_DroneStatus().returning().get(0).id();
+
+                        msgLogger.append(String.format("Register the DroneStatus for drone %s with id %d\n", droneSerialNumber, droneStatusId));
                     }
 
                     @Override
@@ -208,6 +220,30 @@ public class DroneReceptorActivity extends AppCompatActivity {
                     }
                 })
         );
+    }
+
+    private void observeFlightControllerStatus(FlightControllerState djiFlightControllerCurrentState) {
+        // Update the location
+        droneLocationLat = djiFlightControllerCurrentState.getAircraftLocation().getLatitude();
+        droneLocationLng = djiFlightControllerCurrentState.getAircraftLocation().getLongitude();
+        msgLogger.append(String.format("Get the drone location => lat: %s, lng: %s\n", droneLocationLat, droneLocationLng));
+
+        // Build the Apollo mutation call
+        if (droneStatusId != null) {
+            UpdateDroneStatusMutation updateDSMut = UpdateDroneStatusMutation.builder()
+                    .where(DroneStatus_bool_exp.builder()
+                            .id(Integer_comparison_exp.builder()._eq(droneStatusId).build())
+                            .build())
+                    ._set(DroneStatus_set_input.builder()
+                            .locLat(String.valueOf(droneLocationLat))
+                            .locLng(String.valueOf(droneLocationLng))
+                            .build())
+                    .build();
+            ApolloCall<UpdateDroneStatusMutation.Data> updateDSMutCall = application.apolloClient().mutate(updateDSMut);
+
+            // Listen to the Apollo Mutation call
+            disposables.add(Rx2Apollo.from(updateDSMutCall).subscribe());
+        }
     }
 }
 

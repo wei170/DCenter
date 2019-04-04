@@ -37,6 +37,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 import dji.common.flightcontroller.FlightControllerState;
@@ -80,7 +81,7 @@ public class ControllerActivity extends AppCompatActivity implements View.OnClic
 
     private final CompositeDisposable disposables = new CompositeDisposable();
 
-    private double droneLocationLat = 40.423122, droneLocationLng = -86.907188;
+    private double droneLocationLat, droneLocationLng;
     private final Map<Integer, Marker> mMarkers = new ConcurrentHashMap<Integer, Marker>();
     private Marker droneMarker = null;
 
@@ -124,6 +125,8 @@ public class ControllerActivity extends AppCompatActivity implements View.OnClic
         start.setOnClickListener(this);
         stop.setOnClickListener(this);
         manualControllerBtn.setOnClickListener(this);
+
+        subDroneData();
     }
 
     @Override
@@ -149,8 +152,6 @@ public class ControllerActivity extends AppCompatActivity implements View.OnClic
         application = (MApplication) getApplication();
         setContentView(R.layout.activity_controller);
 
-        subDroneData();
-
         IntentFilter filter = new IntentFilter();
         filter.addAction(DJIApplication.FLAG_CONNECTION_CHANGE);
         registerReceiver(mReceiver, filter);
@@ -168,7 +169,6 @@ public class ControllerActivity extends AppCompatActivity implements View.OnClic
     @Override
     protected void onResume(){
         super.onResume();
-        initFlightController();
     }
 
     @Override
@@ -193,10 +193,11 @@ public class ControllerActivity extends AppCompatActivity implements View.OnClic
     }
 
     private void subDroneData() {
+        // Get droneId from the previous intent
         Integer droneId = getIntent().getIntExtra("droneId", 0);
         DroneSubscription droneSub = DroneSubscription.builder().id(droneId).build();
 
-        ApolloSubscriptionCall<DroneSubscription.Data> droneSubCall =  application.apolloClient().subscribe(droneSub);
+        ApolloSubscriptionCall<DroneSubscription.Data> droneSubCall = application.apolloClient().subscribe(droneSub);
         disposables.add(Rx2Apollo.from(droneSubCall)
                 .subscribeWith(new DisposableSubscriber<Response<DroneSubscription.Data>>() {
                     @Override
@@ -224,6 +225,15 @@ public class ControllerActivity extends AppCompatActivity implements View.OnClic
 
     private void updateUI(DroneSubscription.Drones_by_pk dataResponse) {
         droneTV.setText(dataResponse.name());
+
+        droneLocationLat = Double.parseDouble(Objects.requireNonNull(dataResponse.status()).locLat());
+        droneLocationLng = Double.parseDouble(Objects.requireNonNull(dataResponse.status()).locLng());
+
+        // Update the location on the map
+        updateDroneLocation();
+
+        // Locate the drone's place
+        cameraUpdate();
     }
 
     protected BroadcastReceiver mReceiver = new BroadcastReceiver() {
@@ -234,9 +244,7 @@ public class ControllerActivity extends AppCompatActivity implements View.OnClic
         }
     };
 
-    private void onProductConnectionChange()
-    {
-        initFlightController();
+    private void onProductConnectionChange() {
         loginAccount();
     }
 
@@ -254,28 +262,6 @@ public class ControllerActivity extends AppCompatActivity implements View.OnClic
                                 + error.getDescription());
                     }
                 });
-    }
-
-    private void initFlightController() {
-
-        BaseProduct product = DJIApplication.getProductInstance();
-        if (product != null && product.isConnected()) {
-            if (product instanceof Aircraft) {
-                mFlightController = ((Aircraft) product).getFlightController();
-            }
-        }
-
-        if (mFlightController != null) {
-            mFlightController.setStateCallback(new FlightControllerState.Callback() {
-
-                @Override
-                public void onUpdate(FlightControllerState djiFlightControllerCurrentState) {
-                    droneLocationLat = djiFlightControllerCurrentState.getAircraftLocation().getLatitude();
-                    droneLocationLng = djiFlightControllerCurrentState.getAircraftLocation().getLongitude();
-                    updateDroneLocation();
-                }
-            });
-        }
     }
 
     //Add Listener for WaypointMissionOperator
@@ -329,7 +315,6 @@ public class ControllerActivity extends AppCompatActivity implements View.OnClic
 
     private void setUpMap() {
         gMap.setOnMapClickListener(this);// add the listener for click for amap object
-
     }
 
     @Override
@@ -637,10 +622,6 @@ public class ControllerActivity extends AppCompatActivity implements View.OnClic
             gMap = googleMap;
             setUpMap();
         }
-
-//        LatLng shenzhen = new LatLng(22.5362, 113.9454);
-//        gMap.addMarker(new MarkerOptions().position(shenzhen).title("Marker in Purdue"));
-//        gMap.moveCamera(CameraUpdateFactory.newLatLng(shenzhen));
     }
 
 }
