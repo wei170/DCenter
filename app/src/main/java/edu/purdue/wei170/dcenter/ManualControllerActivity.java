@@ -11,23 +11,32 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.CompoundButton;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.ToggleButton;
 
+import com.apollographql.apollo.ApolloSubscriptionCall;
+import com.apollographql.apollo.api.Response;
+import com.apollographql.apollo.rx2.Rx2Apollo;
+import com.google.android.gms.maps.CameraUpdate;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
+
+import java.util.Objects;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import dji.common.error.DJISDKError;
-import dji.common.flightcontroller.simulator.InitializationData;
 import dji.common.flightcontroller.simulator.SimulatorState;
 import dji.common.flightcontroller.virtualstick.FlightControlData;
 import dji.common.flightcontroller.virtualstick.FlightCoordinateSystem;
 import dji.common.flightcontroller.virtualstick.RollPitchControlMode;
 import dji.common.flightcontroller.virtualstick.VerticalControlMode;
 import dji.common.flightcontroller.virtualstick.YawControlMode;
-import dji.common.model.LocationCoordinate2D;
 import dji.common.useraccount.UserAccountState;
 import dji.common.util.CommonCallbacks;
 import dji.sdk.base.BaseProduct;
@@ -35,20 +44,27 @@ import dji.sdk.flightcontroller.FlightController;
 import dji.sdk.products.Aircraft;
 import dji.common.error.DJIError;
 import dji.sdk.useraccount.UserAccountManager;
+import edu.purdue.wei170.dcenter.graphql.DroneSubscription;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.subscribers.DisposableSubscriber;
 
-public class ManualControllerActivity extends AppCompatActivity implements View.OnClickListener {
+public class ManualControllerActivity extends AppCompatActivity implements View.OnClickListener, GoogleMap.OnMapClickListener, OnMapReadyCallback {
 
     private static final String TAG = ManualControllerActivity.class.getName();
+
+    protected MApplication application;
+    private final CompositeDisposable disposables = new CompositeDisposable();
 
     private FlightController mFlightController;
     protected TextView mConnectStatusTextView;
     private Button mBtnEnableVirtualStick;
     private Button mBtnDisableVirtualStick;
-    private ToggleButton mBtnSimulator;
+    private Button mLocate;
     private Button mBtnTakeOff;
     private Button mBtnLand;
 
-    private TextView mTextView;
+//    private TextView mTextView;
+    private TextView mDroneName;
 
     private OnScreenJoystick mScreenJoystickRight;
     private OnScreenJoystick mScreenJoystickLeft;
@@ -61,10 +77,18 @@ public class ManualControllerActivity extends AppCompatActivity implements View.
     private float mYaw;
     private float mThrottle;
 
+    private GoogleMap gMap;
+    private double droneLocationLat, droneLocationLng;
+    private Marker droneMarker = null;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_manualcontroller);
+        application = (MApplication) getApplication();
+
+        // Subscribe the dronestatus data
+        subDroneData();
 
         initUI();
 
@@ -72,6 +96,11 @@ public class ManualControllerActivity extends AppCompatActivity implements View.
         IntentFilter filter = new IntentFilter();
         filter.addAction(DJIApplication.FLAG_CONNECTION_CHANGE);
         registerReceiver(mReceiver, filter);
+
+         // Setup the google map
+        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
+                .findFragmentById(R.id.map);
+        mapFragment.getMapAsync(this);
     }
 
     protected BroadcastReceiver mReceiver = new BroadcastReceiver() {
@@ -158,6 +187,36 @@ public class ManualControllerActivity extends AppCompatActivity implements View.
         super.onDestroy();
     }
 
+    private void subDroneData() {
+        // Get droneId from the previous intent
+        Integer droneId = getIntent().getIntExtra("droneId", 0);
+        DroneSubscription droneSub = DroneSubscription.builder().id(droneId).build();
+
+        ApolloSubscriptionCall<DroneSubscription.Data> droneSubCall = application.apolloClient().subscribe(droneSub);
+        disposables.add(Rx2Apollo.from(droneSubCall)
+                .subscribeWith(new DisposableSubscriber<Response<DroneSubscription.Data>>() {
+                    @Override
+                    public void onNext(final Response<DroneSubscription.Data> dataResponse) {
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                updateMapUI(dataResponse.data().Drones_by_pk());
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void onError(Throwable t) {
+
+                    }
+
+                    @Override
+                    public void onComplete() {
+
+                    }
+                })
+        );
+    }
     private void loginAccount(){
 
         UserAccountManager.getInstance().logIntoDJIUserAccount(this,
@@ -201,9 +260,9 @@ public class ManualControllerActivity extends AppCompatActivity implements View.
                             String positionY = String.format("%.2f", stateData.getPositionY());
                             String positionZ = String.format("%.2f", stateData.getPositionZ());
 
-                            mTextView.setText("Yaw : " + yaw + ", Pitch : " + pitch + ", Roll : " + roll + "\n" + ", PosX : " + positionX +
-                                    ", PosY : " + positionY +
-                                    ", PosZ : " + positionZ);
+//                            mTextView.setText("Yaw : " + yaw + ", Pitch : " + pitch + ", Roll : " + roll + "\n" + ", PosX : " + positionX +
+//                                    ", PosY : " + positionY +
+//                                    ", PosZ : " + positionZ);
                         }
                     });
                 }
@@ -213,13 +272,13 @@ public class ManualControllerActivity extends AppCompatActivity implements View.
 
     private void initUI() {
 
+        mDroneName = (TextView) findViewById(R.id.drone_name_text_view);
+        mLocate = (Button) findViewById(R.id.btn_locate);
         mBtnEnableVirtualStick = (Button) findViewById(R.id.btn_enable_virtual_stick);
         mBtnDisableVirtualStick = (Button) findViewById(R.id.btn_disable_virtual_stick);
         mBtnTakeOff = (Button) findViewById(R.id.btn_take_off);
         mBtnLand = (Button) findViewById(R.id.btn_land);
-        mBtnSimulator = (ToggleButton) findViewById(R.id.btn_start_simulator);
-        mTextView = (TextView) findViewById(R.id.textview_simulator);
-        mConnectStatusTextView = (TextView) findViewById(R.id.ConnectStatusTextView);
+//        mTextView = (TextView) findViewById(R.id.textview_simulator);
         mScreenJoystickRight = (OnScreenJoystick)findViewById(R.id.directionJoystickRight);
         mScreenJoystickLeft = (OnScreenJoystick)findViewById(R.id.directionJoystickLeft);
 
@@ -228,52 +287,6 @@ public class ManualControllerActivity extends AppCompatActivity implements View.
         mBtnTakeOff.setOnClickListener(this);
         mBtnLand.setOnClickListener(this);
 
-        mBtnSimulator.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (isChecked) {
-
-                    mTextView.setVisibility(View.VISIBLE);
-
-                    if (mFlightController != null) {
-
-                        mFlightController.getSimulator()
-                                .start(InitializationData.createInstance(new LocationCoordinate2D(23, 113), 10, 10),
-                                        new CommonCallbacks.CompletionCallback() {
-                                            @Override
-                                            public void onResult(DJIError djiError) {
-                                                if (djiError != null) {
-                                                    showToast(djiError.getDescription());
-                                                }else
-                                                {
-                                                    showToast("Start Simulator Success");
-                                                }
-                                            }
-                                        });
-                    }
-
-                } else {
-
-                    mTextView.setVisibility(View.INVISIBLE);
-
-                    if (mFlightController != null) {
-                        mFlightController.getSimulator()
-                                .stop(new CommonCallbacks.CompletionCallback() {
-                                          @Override
-                                          public void onResult(DJIError djiError) {
-                                              if (djiError != null) {
-                                                  showToast(djiError.getDescription());
-                                              }else
-                                              {
-                                                  showToast("Stop Simulator Success");
-                                              }
-                                          }
-                                      }
-                                );
-                    }
-                }
-            }
-        });
 
         mScreenJoystickRight.setJoystickListener(new OnScreenJoystickListener(){
 
@@ -335,6 +348,11 @@ public class ManualControllerActivity extends AppCompatActivity implements View.
     public void onClick(View v) {
 
         switch (v.getId()) {
+            case R.id.btn_locate:
+                updateDroneLocation();
+                cameraUpdate(); // Locate the drone's place
+                break;
+
             case R.id.btn_enable_virtual_stick:
                 if (mFlightController != null){
 
@@ -432,4 +450,66 @@ public class ManualControllerActivity extends AppCompatActivity implements View.
         }
     }
 
+    @Override
+    public void onMapClick(LatLng latLng) {
+
+    }
+
+    @Override
+    public void onMapReady(GoogleMap googleMap) {
+        if (gMap == null) {
+            gMap = googleMap;
+            setUpMap();
+        }
+    }
+
+    private void setUpMap() {
+        gMap.setOnMapClickListener(this);// add the listener for click for amap object
+    }
+
+    // Update the drone location based on states from MCU.
+    private void updateDroneLocation(){
+        LatLng pos = new LatLng(droneLocationLat, droneLocationLng);
+
+        //Create MarkerOptions object
+        final MarkerOptions markerOptions = new MarkerOptions();
+        markerOptions.position(pos);
+        markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.aircraft));
+
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                if (droneMarker != null) {
+                    droneMarker.remove();
+                }
+
+                if (checkGpsCoordination(droneLocationLat, droneLocationLng)) {
+                    droneMarker = gMap.addMarker(markerOptions);
+                }
+            }
+        });
+    }
+
+    public static boolean checkGpsCoordination(double latitude, double longitude) {
+        return (latitude > -90 && latitude < 90 && longitude > -180 && longitude < 180) && (latitude != 0f && longitude != 0f);
+    }
+
+    private void cameraUpdate() {
+        LatLng pos = new LatLng(droneLocationLat, droneLocationLng);
+        float zoomlevel = (float) 18.0;
+        CameraUpdate cu = CameraUpdateFactory.newLatLngZoom(pos, zoomlevel);
+        gMap.moveCamera(cu);
+    }
+
+    private void updateMapUI(DroneSubscription.Drones_by_pk dataResponse) {
+        mDroneName.setText(dataResponse.name());
+
+        droneLocationLat = Double.parseDouble(Objects.requireNonNull(dataResponse.status()).locLat());
+        droneLocationLng = Double.parseDouble(Objects.requireNonNull(dataResponse.status()).locLng());
+
+        if (gMap != null) { // When Google map is ready
+            updateDroneLocation();
+            cameraUpdate();
+        }
+    }
 }

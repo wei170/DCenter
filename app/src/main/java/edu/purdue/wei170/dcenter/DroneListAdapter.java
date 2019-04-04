@@ -43,7 +43,7 @@ public class DroneListAdapter extends ArrayAdapter<DronesQuery.Drone> {
         droneNameView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(context, ControllerActivity.class);
+                Intent intent = new Intent(context, ManualControllerActivity.class);
 
                 intent.putExtra("droneId", droneId);
                 context.startActivity(intent);

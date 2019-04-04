@@ -85,7 +85,6 @@ public class ControllerActivity extends AppCompatActivity implements View.OnClic
     private List<Waypoint> waypointList = new ArrayList<>();
 
     public static WaypointMission.Builder waypointMissionBuilder;
-    private FlightController mFlightController;
     private WaypointMissionOperator instance;
     private WaypointMissionFinishedAction mFinishedAction = WaypointMissionFinishedAction.NO_ACTION;
     private WaypointMissionHeadingMode mHeadingMode = WaypointMissionHeadingMode.AUTO;
@@ -141,7 +140,6 @@ public class ControllerActivity extends AppCompatActivity implements View.OnClic
         mapFragment.getMapAsync(this);
 
         addListener();
-
     }
 
     @Override
@@ -411,7 +409,7 @@ public class ControllerActivity extends AppCompatActivity implements View.OnClic
         if (isAdd == false) {
             isAdd = true;
             add.setText("Exit");
-        }else{
+        } else{
             isAdd = false;
             add.setText("Add");
         }
