@@ -41,24 +41,13 @@
             android:layout_height="wrap_content"
             android:text="Land"
             android:layout_weight="1"/>
-    </LinearLayout>
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal">
         <Button
-            android:id="@+id/btn_enable_virtual_stick"
+            android:id="@+id/btn_go_home"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Enable Virtual Stick"
-            android:layout_weight="0.9"/>
-        <Button
-            android:id="@+id/btn_disable_virtual_stick"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Disable Virtual Stick"
-            android:layout_weight="0.9"/>
+            android:layout_weight="1"
+            android:text="Go Home" />
     </LinearLayout>
 
     <LinearLayout
@@ -70,12 +59,12 @@
             android:id="@+id/btn_switch_waypoint"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:srcCompat="@drawable/offline_map_header_bar_management" />
+            app:srcCompat="@android:drawable/ic_dialog_map" />
     </LinearLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="300dp">
+        android:layout_height="350dp">
 
         <fragment
             android:id="@+id/map"
@@ -92,9 +81,8 @@
             android:id="@+id/directionJoystickLeft"
             android:layout_width="130dp"
             android:layout_height="130dp"
-            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
             android:layout_alignParentBottom="true"
-            android:layout_marginBottom="10dp"
             android:layout_marginLeft="10dp"
             android:background="@mipmap/joystick_bg" />
 
@@ -102,11 +90,18 @@
             android:id="@+id/directionJoystickRight"
             android:layout_width="130dp"
             android:layout_height="130dp"
-            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
             android:layout_alignParentBottom="true"
-            android:layout_marginBottom="10dp"
             android:layout_marginRight="10dp"
             android:background="@mipmap/joystick_bg" />
+
+        <TextView
+            android:id="@+id/text_drone_status"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignTop="@+id/directionJoystickLeft"
+            android:layout_centerHorizontal="true"
+            android:text="TextView" />
 
     </RelativeLayout>
 

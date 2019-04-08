@@ -4,8 +4,15 @@ import android.app.Application;
 import android.content.Context;
 
 import com.apollographql.apollo.ApolloClient;
+import com.apollographql.apollo.response.CustomTypeAdapter;
+import com.apollographql.apollo.response.CustomTypeValue;
 import com.apollographql.apollo.subscription.WebSocketSubscriptionTransport;
 import com.secneo.sdk.Helper;
+
+import org.jetbrains.annotations.NotNull;
+
+import java.sql.Timestamp;
+import java.text.ParseException;
 
 import okhttp3.OkHttpClient;
 

@@ -1,5 +1,6 @@
 package edu.purdue.wei170.dcenter;
 
+import android.annotation.SuppressLint;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -14,6 +15,7 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.apollographql.apollo.ApolloCall;
 import com.apollographql.apollo.ApolloSubscriptionCall;
 import com.apollographql.apollo.api.Response;
 import com.apollographql.apollo.rx2.Rx2Apollo;
@@ -27,12 +29,14 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.Timer;
 import java.util.TimerTask;
 
 import dji.common.flightcontroller.simulator.SimulatorState;
-import dji.common.flightcontroller.virtualstick.FlightControlData;
 import dji.common.flightcontroller.virtualstick.FlightCoordinateSystem;
 import dji.common.flightcontroller.virtualstick.RollPitchControlMode;
 import dji.common.flightcontroller.virtualstick.VerticalControlMode;
@@ -45,6 +49,8 @@ import dji.sdk.products.Aircraft;
 import dji.common.error.DJIError;
 import dji.sdk.useraccount.UserAccountManager;
 import edu.purdue.wei170.dcenter.graphql.DroneSubscription;
+import edu.purdue.wei170.dcenter.graphql.InsertFlightControlMsgMutation;
+import edu.purdue.wei170.dcenter.graphql.type.FlightControlMsgs_insert_input;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.subscribers.DisposableSubscriber;
 
@@ -57,13 +63,12 @@ public class ManualControllerActivity extends AppCompatActivity implements View.
 
     private FlightController mFlightController;
     protected TextView mConnectStatusTextView;
-    private Button mBtnEnableVirtualStick;
-    private Button mBtnDisableVirtualStick;
-    private Button mLocate;
+    private Button mBtnLocate;
     private Button mBtnTakeOff;
     private Button mBtnLand;
+    private Button mBtnGoHome;
 
-//    private TextView mTextView;
+    private TextView mTextDroneStatus;
     private TextView mDroneName;
 
     private OnScreenJoystick mScreenJoystickRight;
@@ -78,14 +83,20 @@ public class ManualControllerActivity extends AppCompatActivity implements View.
     private float mThrottle;
 
     private GoogleMap gMap;
-    private double droneLocationLat, droneLocationLng;
     private Marker droneMarker = null;
+
+    private Integer droneId;
+    private double droneLocationLat, droneLocationLng, droneLocationAlt;
+    private float droneDirection;
+    private boolean isLanding;
+    private boolean isGoingHome;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_manualcontroller);
         application = (MApplication) getApplication();
+        droneId = getIntent().getIntExtra("droneId", 0);
 
         // Subscribe the dronestatus data
         subDroneData();
@@ -107,7 +118,8 @@ public class ManualControllerActivity extends AppCompatActivity implements View.
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            updateTitleBar();
+//            updateTitleBar();
+            loginAccount();
         }
     };
 
@@ -150,10 +162,7 @@ public class ManualControllerActivity extends AppCompatActivity implements View.
     public void onResume() {
         Log.e(TAG, "onResume");
         super.onResume();
-        updateTitleBar();
         initFlightController();
-        loginAccount();
-
     }
 
     @Override
@@ -184,12 +193,12 @@ public class ManualControllerActivity extends AppCompatActivity implements View.
             mSendVirtualStickDataTimer.purge();
             mSendVirtualStickDataTimer = null;
         }
+        disposables.dispose();
         super.onDestroy();
     }
 
     private void subDroneData() {
         // Get droneId from the previous intent
-        Integer droneId = getIntent().getIntExtra("droneId", 0);
         DroneSubscription droneSub = DroneSubscription.builder().id(droneId).build();
 
         ApolloSubscriptionCall<DroneSubscription.Data> droneSubCall = application.apolloClient().subscribe(droneSub);
@@ -200,7 +209,7 @@ public class ManualControllerActivity extends AppCompatActivity implements View.
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                updateMapUI(dataResponse.data().Drones_by_pk());
+                                updateUI(dataResponse.data().Drones_by_pk());
                             }
                         });
                     }
@@ -217,6 +226,7 @@ public class ManualControllerActivity extends AppCompatActivity implements View.
                 })
         );
     }
+
     private void loginAccount(){
 
         UserAccountManager.getInstance().logIntoDJIUserAccount(this,
@@ -246,47 +256,27 @@ public class ManualControllerActivity extends AppCompatActivity implements View.
             mFlightController.setYawControlMode(YawControlMode.ANGULAR_VELOCITY);
             mFlightController.setVerticalControlMode(VerticalControlMode.VELOCITY);
             mFlightController.setRollPitchCoordinateSystem(FlightCoordinateSystem.BODY);
-            mFlightController.getSimulator().setStateCallback(new SimulatorState.Callback() {
-                @Override
-                public void onUpdate(final SimulatorState stateData) {
-                    new Handler(Looper.getMainLooper()).post(new Runnable() {
-                        @Override
-                        public void run() {
-
-                            String yaw = String.format("%.2f", stateData.getYaw());
-                            String pitch = String.format("%.2f", stateData.getPitch());
-                            String roll = String.format("%.2f", stateData.getRoll());
-                            String positionX = String.format("%.2f", stateData.getPositionX());
-                            String positionY = String.format("%.2f", stateData.getPositionY());
-                            String positionZ = String.format("%.2f", stateData.getPositionZ());
-
-//                            mTextView.setText("Yaw : " + yaw + ", Pitch : " + pitch + ", Roll : " + roll + "\n" + ", PosX : " + positionX +
-//                                    ", PosY : " + positionY +
-//                                    ", PosZ : " + positionZ);
-                        }
-                    });
-                }
-            });
         }
     }
 
     private void initUI() {
 
         mDroneName = (TextView) findViewById(R.id.drone_name_text_view);
-        mLocate = (Button) findViewById(R.id.btn_locate);
-        mBtnEnableVirtualStick = (Button) findViewById(R.id.btn_enable_virtual_stick);
-        mBtnDisableVirtualStick = (Button) findViewById(R.id.btn_disable_virtual_stick);
+        mBtnLocate = (Button) findViewById(R.id.btn_locate);
         mBtnTakeOff = (Button) findViewById(R.id.btn_take_off);
         mBtnLand = (Button) findViewById(R.id.btn_land);
-//        mTextView = (TextView) findViewById(R.id.textview_simulator);
+        mBtnGoHome = (Button) findViewById(R.id.btn_go_home);
+
         mScreenJoystickRight = (OnScreenJoystick)findViewById(R.id.directionJoystickRight);
         mScreenJoystickLeft = (OnScreenJoystick)findViewById(R.id.directionJoystickLeft);
+        mTextDroneStatus = (TextView) findViewById(R.id.text_drone_status);
 
-        mBtnEnableVirtualStick.setOnClickListener(this);
-        mBtnDisableVirtualStick.setOnClickListener(this);
+        mBtnLocate.setOnClickListener(this);
         mBtnTakeOff.setOnClickListener(this);
         mBtnLand.setOnClickListener(this);
+        mBtnGoHome.setOnClickListener(this);
 
+        mTextDroneStatus.setSingleLine(false);
 
         mScreenJoystickRight.setJoystickListener(new OnScreenJoystickListener(){
 
@@ -337,7 +327,7 @@ public class ManualControllerActivity extends AppCompatActivity implements View.
                 if (null == mSendVirtualStickDataTimer) {
                     mSendVirtualStickDataTask = new SendVirtualStickDataTask();
                     mSendVirtualStickDataTimer = new Timer();
-                    mSendVirtualStickDataTimer.schedule(mSendVirtualStickDataTask, 0, 200);
+                    mSendVirtualStickDataTimer.schedule(mSendVirtualStickDataTask, 0, 100);
                 }
 
             }
@@ -347,105 +337,89 @@ public class ManualControllerActivity extends AppCompatActivity implements View.
     @Override
     public void onClick(View v) {
 
+        final List<FlightControlMsgs_insert_input> inputObjs = new ArrayList<FlightControlMsgs_insert_input>();
+
         switch (v.getId()) {
             case R.id.btn_locate:
                 updateDroneLocation();
                 cameraUpdate(); // Locate the drone's place
                 break;
 
-            case R.id.btn_enable_virtual_stick:
-                if (mFlightController != null){
-
-                    mFlightController.setVirtualStickModeEnabled(true, new CommonCallbacks.CompletionCallback() {
-                        @Override
-                        public void onResult(DJIError djiError) {
-                            if (djiError != null){
-                                showToast(djiError.getDescription());
-                            }else
-                            {
-                                showToast("Enable Virtual Stick Success");
-                            }
-                        }
-                    });
-
-                }
-                break;
-
-            case R.id.btn_disable_virtual_stick:
-
-                if (mFlightController != null){
-                    mFlightController.setVirtualStickModeEnabled(false, new CommonCallbacks.CompletionCallback() {
-                        @Override
-                        public void onResult(DJIError djiError) {
-                            if (djiError != null) {
-                                showToast(djiError.getDescription());
-                            } else {
-                                showToast("Disable Virtual Stick Success");
-                            }
-                        }
-                    });
-                }
-                break;
-
             case R.id.btn_take_off:
-                if (mFlightController != null){
-                    mFlightController.startTakeoff(
-                            new CommonCallbacks.CompletionCallback() {
-                                @Override
-                                public void onResult(DJIError djiError) {
-                                    if (djiError != null) {
-                                        showToast(djiError.getDescription());
-                                    } else {
-                                        showToast("Take off Success");
-                                    }
-                                }
-                            }
-                    );
-                }
+                inputObjs.add(FlightControlMsgs_insert_input.builder()
+                        .drone_id(droneId)
+                        .type("take_off")
+                        .value("1")
+                        .createdAt((new Timestamp(System.currentTimeMillis())).toString())
+                        .build()
+                );
 
                 break;
 
             case R.id.btn_land:
-                if (mFlightController != null){
+                String landType = (isLanding ? "cancel_landing" : "landing");
+                inputObjs.add(FlightControlMsgs_insert_input.builder()
+                        .drone_id(droneId)
+                        .type(landType)
+                        .value("1")
+                        .createdAt((new Timestamp(System.currentTimeMillis())).toString())
+                        .build()
+                );
 
-                    mFlightController.startLanding(
-                            new CommonCallbacks.CompletionCallback() {
-                                @Override
-                                public void onResult(DJIError djiError) {
-                                    if (djiError != null) {
-                                        showToast(djiError.getDescription());
-                                    } else {
-                                        showToast("Start Landing");
-                                    }
-                                }
-                            }
-                    );
+                break;
 
-                }
+            case R.id.btn_go_home:
+                String goHomeType = (isGoingHome ? "cancel_go_home" : "go_home");
+                inputObjs.add(FlightControlMsgs_insert_input.builder()
+                        .drone_id(droneId)
+                        .type(goHomeType)
+                        .value("1")
+                        .createdAt((new Timestamp(System.currentTimeMillis())).toString())
+                        .build()
+                );
 
                 break;
 
             default:
                 break;
         }
+
+        InsertFlightControlMsgMutation insertMut = InsertFlightControlMsgMutation.builder()
+                .objects(inputObjs)
+                .build();
+        ApolloCall<InsertFlightControlMsgMutation.Data> mutCall = application.apolloClient().mutate(insertMut);
+
+        disposables.add(Rx2Apollo.from(mutCall).subscribe());
     }
 
     class SendVirtualStickDataTask extends TimerTask {
 
+        @SuppressLint("DefaultLocale")
         @Override
         public void run() {
 
-            if (mFlightController != null) {
-                mFlightController.sendVirtualStickFlightControlData(
-                        new FlightControlData(
-                                mPitch, mRoll, mYaw, mThrottle
-                        ), new CommonCallbacks.CompletionCallback() {
-                            @Override
-                            public void onResult(DJIError djiError) {
+            // Check if the joysticks are back to the center
+            if (mPitch == 0 && mRoll == 0 && mYaw == 0 && mThrottle == 0) {
+                mSendVirtualStickDataTimer.cancel();
+                mSendVirtualStickDataTimer.purge();
+                mSendVirtualStickDataTimer = null;
+            }
 
-                            }
-                        }
+            if (droneId != null) {
+                final List<FlightControlMsgs_insert_input> inputObjs = new ArrayList<FlightControlMsgs_insert_input>();
+                inputObjs.add(FlightControlMsgs_insert_input.builder()
+                        .drone_id(droneId)
+                        .type("joystick")
+                        .value(String.format("%f %f %f %f", mPitch, mRoll, mYaw, mThrottle))
+                        .createdAt((new Timestamp(System.currentTimeMillis())).toString())
+                        .build()
                 );
+                InsertFlightControlMsgMutation insertMut = InsertFlightControlMsgMutation.builder()
+                        .objects(inputObjs)
+                        .build();
+                ApolloCall<InsertFlightControlMsgMutation.Data> mutCall = application.apolloClient().mutate(insertMut);
+
+                disposables.add(Rx2Apollo.from(mutCall).subscribe());
             }
         }
     }
@@ -464,7 +438,7 @@ public class ManualControllerActivity extends AppCompatActivity implements View.
     }
 
     private void setUpMap() {
-        gMap.setOnMapClickListener(this);// add the listener for click for amap object
+        gMap.setOnMapClickListener(this); // add the listener for click for amap object
     }
 
     // Update the drone location based on states from MCU.
@@ -485,6 +459,7 @@ public class ManualControllerActivity extends AppCompatActivity implements View.
 
                 if (checkGpsCoordination(droneLocationLat, droneLocationLng)) {
                     droneMarker = gMap.addMarker(markerOptions);
+                    droneMarker.setRotation(droneDirection); // Set the rotation
                 }
             }
         });
@@ -501,15 +476,47 @@ public class ManualControllerActivity extends AppCompatActivity implements View.
         gMap.moveCamera(cu);
     }
 
-    private void updateMapUI(DroneSubscription.Drones_by_pk dataResponse) {
+    @SuppressLint("DefaultLocale")
+    private void updateUI(DroneSubscription.Drones_by_pk dataResponse) {
         mDroneName.setText(dataResponse.name());
 
         droneLocationLat = Double.parseDouble(Objects.requireNonNull(dataResponse.status()).locLat());
         droneLocationLng = Double.parseDouble(Objects.requireNonNull(dataResponse.status()).locLng());
+        droneLocationAlt = Double.parseDouble(Objects.requireNonNull(dataResponse.status()).locAlt());
+        droneDirection = Float.parseFloat(Objects.requireNonNull(dataResponse.status()).heading());
+
+        DroneSubscription.Status status = dataResponse.status();
+
+        // Update the buttons
+        setGoHome(status.isGoingHome());
+        setLanding(status.isLanding());
 
         if (gMap != null) { // When Google map is ready
             updateDroneLocation();
-            cameraUpdate();
+        }
+
+        mTextDroneStatus.setText(
+                String.format("Battery: %d%%\nAlt: %.1f\nvX: %s\nvY:%s\nvZ: %s",
+                        status.battery(), droneLocationAlt, status.vX(), status.vY(), status.vZ()
+                )
+        );
+    }
+
+    private void setGoHome(boolean isGoingHome) {
+        this.isGoingHome = isGoingHome;
+        if (isGoingHome) {
+            mBtnGoHome.setText("Cancel");
+        } else {
+            mBtnGoHome.setText("Go Home");
+        }
+    }
+
+    private void setLanding(boolean isLanding) {
+        this.isLanding = isLanding;
+        if (isLanding) {
+            mBtnLand.setText("Cancel");
+        } else {
+            mBtnLand.setText("Land");
         }
     }
 }

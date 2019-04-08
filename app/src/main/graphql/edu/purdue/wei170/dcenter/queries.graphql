@@ -28,12 +28,31 @@ subscription Drone($id: Int!) {
       battery
 			locLat
 			locLng
+			locAlt
+			vX
+			vY
+			vZ
+			heading
+			isLanding
+			isGoingHome
     }
     flight_msgs {
       type
       value
       id
     }
+  }
+}
+
+subscription FlightControlMsgs(
+  $limit: Int
+  $order_by: [FlightControlMsgs_order_by!]
+  $where: FlightControlMsgs_bool_exp
+) {
+  FlightControlMsgs(limit: $limit, order_by: $order_by, where: $where) {
+    id
+    type
+    value
   }
 }
 
@@ -47,6 +66,14 @@ mutation insertDrones($objects: [Drones_insert_input!]!) {
 
 mutation insertDroneStatus($objects: [DroneStatus_insert_input!]!) {
 	insert_DroneStatus(objects: $objects) {
+		returning {
+			id
+		}
+	}
+}
+
+mutation insertFlightControlMsg($objects: [FlightControlMsgs_insert_input!]!) {
+	insert_FlightControlMsgs(objects: $objects) {
 		returning {
 			id
 		}
