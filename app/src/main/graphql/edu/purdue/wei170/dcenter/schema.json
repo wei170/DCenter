@@ -5302,6 +5302,20 @@
             "__typename": "__Field"
           },
           {
+            "name": "receivedAt",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null,
+              "__typename": "__Type"
+            },
+            "isDeprecated": false,
+            "deprecationReason": null,
+            "__typename": "__Field"
+          },
+          {
             "name": "type",
             "description": null,
             "args": [],
@@ -5969,6 +5983,18 @@
             "__typename": "__InputValue"
           },
           {
+            "name": "receivedAt",
+            "description": null,
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "text_comparison_exp",
+              "ofType": null,
+              "__typename": "__Type"
+            },
+            "defaultValue": null,
+            "__typename": "__InputValue"
+          },
+          {
             "name": "type",
             "description": null,
             "type": {
@@ -6108,6 +6134,18 @@
             "__typename": "__InputValue"
           },
           {
+            "name": "receivedAt",
+            "description": null,
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null,
+              "__typename": "__Type"
+            },
+            "defaultValue": null,
+            "__typename": "__InputValue"
+          },
+          {
             "name": "type",
             "description": null,
             "type": {
@@ -6185,6 +6223,20 @@
             "__typename": "__Field"
           },
           {
+            "name": "receivedAt",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null,
+              "__typename": "__Type"
+            },
+            "isDeprecated": false,
+            "deprecationReason": null,
+            "__typename": "__Field"
+          },
+          {
             "name": "type",
             "description": null,
             "args": [],
@@ -6251,6 +6303,18 @@
           },
           {
             "name": "id",
+            "description": null,
+            "type": {
+              "kind": "ENUM",
+              "name": "order_by",
+              "ofType": null,
+              "__typename": "__Type"
+            },
+            "defaultValue": null,
+            "__typename": "__InputValue"
+          },
+          {
+            "name": "receivedAt",
             "description": null,
             "type": {
               "kind": "ENUM",
@@ -6339,6 +6403,20 @@
             "__typename": "__Field"
           },
           {
+            "name": "receivedAt",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null,
+              "__typename": "__Type"
+            },
+            "isDeprecated": false,
+            "deprecationReason": null,
+            "__typename": "__Field"
+          },
+          {
             "name": "type",
             "description": null,
             "args": [],
@@ -6405,6 +6483,18 @@
           },
           {
             "name": "id",
+            "description": null,
+            "type": {
+              "kind": "ENUM",
+              "name": "order_by",
+              "ofType": null,
+              "__typename": "__Type"
+            },
+            "defaultValue": null,
+            "__typename": "__InputValue"
+          },
+          {
+            "name": "receivedAt",
             "description": null,
             "type": {
               "kind": "ENUM",
@@ -6657,6 +6747,18 @@
             "__typename": "__InputValue"
           },
           {
+            "name": "receivedAt",
+            "description": null,
+            "type": {
+              "kind": "ENUM",
+              "name": "order_by",
+              "ofType": null,
+              "__typename": "__Type"
+            },
+            "defaultValue": null,
+            "__typename": "__InputValue"
+          },
+          {
             "name": "type",
             "description": null,
             "type": {
@@ -6716,6 +6818,13 @@
             "__typename": "__EnumValue"
           },
           {
+            "name": "receivedAt",
+            "description": "column name",
+            "isDeprecated": false,
+            "deprecationReason": null,
+            "__typename": "__EnumValue"
+          },
+          {
             "name": "type",
             "description": "column name",
             "isDeprecated": false,
@@ -6769,6 +6878,18 @@
             "type": {
               "kind": "SCALAR",
               "name": "Int",
+              "ofType": null,
+              "__typename": "__Type"
+            },
+            "defaultValue": null,
+            "__typename": "__InputValue"
+          },
+          {
+            "name": "receivedAt",
+            "description": null,
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
               "ofType": null,
               "__typename": "__Type"
             },
@@ -7133,6 +7254,13 @@
           },
           {
             "name": "id",
+            "description": "column name",
+            "isDeprecated": false,
+            "deprecationReason": null,
+            "__typename": "__EnumValue"
+          },
+          {
+            "name": "receivedAt",
             "description": "column name",
             "isDeprecated": false,
             "deprecationReason": null,

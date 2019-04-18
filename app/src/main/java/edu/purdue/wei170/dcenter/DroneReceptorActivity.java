@@ -10,6 +10,7 @@ import android.util.Log;
 import android.widget.TextView;
 
 import com.apollographql.apollo.ApolloCall;
+import com.apollographql.apollo.ApolloMutationCall;
 import com.apollographql.apollo.ApolloSubscriptionCall;
 import com.apollographql.apollo.api.Response;
 import com.apollographql.apollo.rx2.Rx2Apollo;
@@ -39,6 +40,7 @@ import edu.purdue.wei170.dcenter.graphql.FlightControlMsgsSubscription;
 import edu.purdue.wei170.dcenter.graphql.InsertDroneStatusMutation;
 import edu.purdue.wei170.dcenter.graphql.InsertDronesMutation;
 import edu.purdue.wei170.dcenter.graphql.UpdateDroneStatusMutation;
+import edu.purdue.wei170.dcenter.graphql.UpdateFlightMsgMutation;
 import edu.purdue.wei170.dcenter.graphql.type.DroneStatus_bool_exp;
 import edu.purdue.wei170.dcenter.graphql.type.DroneStatus_insert_input;
 import edu.purdue.wei170.dcenter.graphql.type.DroneStatus_set_input;
@@ -46,6 +48,7 @@ import edu.purdue.wei170.dcenter.graphql.type.Drones_bool_exp;
 import edu.purdue.wei170.dcenter.graphql.type.Drones_insert_input;
 import edu.purdue.wei170.dcenter.graphql.type.FlightControlMsgs_bool_exp;
 import edu.purdue.wei170.dcenter.graphql.type.FlightControlMsgs_order_by;
+import edu.purdue.wei170.dcenter.graphql.type.FlightControlMsgs_set_input;
 import edu.purdue.wei170.dcenter.graphql.type.Integer_comparison_exp;
 import edu.purdue.wei170.dcenter.graphql.type.Order_by;
 import edu.purdue.wei170.dcenter.graphql.type.Text_comparison_exp;
@@ -172,7 +175,7 @@ public class DroneReceptorActivity extends AppCompatActivity {
                 // Setup the timer for the joystick controll
                 mSendVirtualStickDataTask = new SendVirtualStickDataTask();
                 mSendVirtualStickDataTimer = new Timer();
-                mSendVirtualStickDataTimer.schedule(mSendVirtualStickDataTask, 0, 50);
+                mSendVirtualStickDataTimer.schedule(mSendVirtualStickDataTask, 0, 10);
 
             }
         }
@@ -341,11 +344,13 @@ public class DroneReceptorActivity extends AppCompatActivity {
                                 ._eq(droneId)
                                 .build())
                         ._and(
-                                Arrays.asList(FlightControlMsgs_bool_exp.builder()
-                                        .createdAt(Text_comparison_exp.builder()
-                                                ._gte((new Timestamp(System.currentTimeMillis())).toString())
-                                                .build())
-                                        .build())
+                                Arrays.asList(
+                                        FlightControlMsgs_bool_exp.builder()
+                                                .createdAt(Text_comparison_exp.builder()
+                                                        ._gte((new Timestamp(System.currentTimeMillis())).toString())
+                                                        .build())
+                                                .build()
+                                        )
                         )
                         .build())
                 .build();
@@ -360,12 +365,7 @@ public class DroneReceptorActivity extends AppCompatActivity {
                     public void onNext(final Response<FlightControlMsgsSubscription.Data> dataResponse) {
                         final List<FlightControlMsgsSubscription.FlightControlMsg> msgs = dataResponse.data().FlightControlMsgs();
                         if (!msgs.isEmpty()) { // if get any control update
-                            runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    handleMsgUpdate(msgs);
-                                }
-                            });
+                            handleMsgUpdate(msgs);
                         }
                     }
 
@@ -382,11 +382,30 @@ public class DroneReceptorActivity extends AppCompatActivity {
         ));
     }
 
+    private void updateMsgRecTime(Integer msgId) {
+        UpdateFlightMsgMutation mut = UpdateFlightMsgMutation.builder()
+                .where(FlightControlMsgs_bool_exp.builder()
+                        .id(Integer_comparison_exp.builder()
+                                ._eq(msgId)
+                                .build())
+                        .build())
+                ._set(FlightControlMsgs_set_input.builder()
+                        .receivedAt((new Timestamp(System.currentTimeMillis())).toString())
+                        .build())
+                .build();
+        ApolloMutationCall<UpdateFlightMsgMutation.Data> mutCall = application.apolloClient().mutate(mut);
+
+        disposables.add(Rx2Apollo.from(mutCall).subscribe());
+    }
+
     private void handleMsgUpdate(List<FlightControlMsgsSubscription.FlightControlMsg> msgs) {
         // Check the msg type
         for (FlightControlMsgsSubscription.FlightControlMsg msg : msgs) {
-            switch (msg.type()) {
+            // Update the receive time
+            final Integer msgId = msg.id();
+            updateMsgRecTime(msgId);
 
+            switch (msg.type()) {
                 case "take_off":
                     if (mFlightController != null) {
                         mFlightController.startTakeoff(

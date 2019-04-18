@@ -18,7 +18,7 @@ import okhttp3.OkHttpClient;
 
 public class MApplication extends Application {
 
-    private static final String BASE_URL = "https://dcenter-guocheng.herokuapp.com/v1alpha1/graphql";
+    private static final String BASE_URL = "http://api.dcenter.academy/v1alpha1/graphql";
     private ApolloClient apolloClient;
     private DJIApplication djiApplication;
 

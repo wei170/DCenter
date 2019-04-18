@@ -87,3 +87,11 @@ mutation updateDroneStatus($where: DroneStatus_bool_exp!, $_set: DroneStatus_set
 		}
 	}
 }
+
+mutation updateFlightMsg($where: FlightControlMsgs_bool_exp!, $_set: FlightControlMsgs_set_input) {
+	update_FlightControlMsgs(where: $where, _set: $_set) {
+		returning {
+			id
+		}
+	}
+}
